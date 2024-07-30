@@ -1,6 +1,7 @@
 package com.example.gotsaeng_back.auth.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,17 +13,18 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Point {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "point_id")
+    @Column(name = "point_id", nullable = false)
     private Long pointId;
 
     @Column(name = "point_history")
     private String pointHistory;
 
-    @Column(name = "get_date")
-    private LocalDateTime getDate;
+    @Column(name = "get_date", nullable = false)
+    private LocalDateTime getDate = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
