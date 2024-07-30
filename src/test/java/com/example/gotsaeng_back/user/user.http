@@ -1,0 +1,22 @@
+### Register a new user
+POST http://localhost:8080/api/user/userreg
+Content-Type: application/json
+
+{
+  "username": "user1",
+  "password": "1234",
+  "name": "정호현",
+  "email": "asdf@naver.com",
+  "birthDate": "2024-12-12",
+  "registrationDate": "2024-12-12T12:00:00"
+}
+
+### Login request
+POST http://localhost:8080/api/user/login
+Content-Type: application/x-www-form-urlencoded
+
+username=user1&password=1234
+
+### userList request
+GET http://localhost:8080/api/user/userList
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMSIsImlhdCI6MTcyMjM1NzYzMiwiZXhwIjoxNzIyMzY0ODMyfQ.Kc3KyKSh3XU5RUhVzbOp2uW0bePMU-xW1U3unvIwsrM

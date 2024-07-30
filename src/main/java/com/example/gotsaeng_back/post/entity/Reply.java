@@ -27,6 +27,6 @@ public class Reply {
     private LocalDateTime createdDate = LocalDateTime.now();
 
     @ManyToOne
-    @JoinColumn(name = "reply_id", nullable = false)
+    @JoinColumn(name = "comment_id", nullable = false)
     private Comment commentId;
 }
