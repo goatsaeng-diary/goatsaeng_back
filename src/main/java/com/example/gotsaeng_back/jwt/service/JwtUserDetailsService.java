@@ -1,14 +1,16 @@
 package com.example.gotsaeng_back.jwt.service;
 
+
 import com.example.gotsaeng_back.auth.entity.User;
 import com.example.gotsaeng_back.auth.service.UserService;
 import java.util.ArrayList;
-
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class JwtUserDetailsService implements UserDetailsService {

@@ -5,10 +5,12 @@ import com.example.gotsaeng_back.auth.entity.User;
 import com.example.gotsaeng_back.auth.service.UserService;
 import com.example.gotsaeng_back.jwt.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,13 +40,17 @@ public class UserRestController {
         String accessToken = jwtUtil.generateAccessToken(username);
         String refreshToken = jwtUtil.generateRefreshToken(username);
 
-        //토큰을 쿠키에 저장
-        userService.addCookies(response,accessToken,refreshToken,user);
+
 
         return ResponseEntity.ok(new TokenDto(accessToken, refreshToken));
     }
     @PostMapping("/userreg")
     public User userreg(@RequestBody User user){
         return userService.regUser(user);
+    }
+
+    @GetMapping("/userList")
+    public List<User> userList(){
+        return userService.userList();
     }
 }
