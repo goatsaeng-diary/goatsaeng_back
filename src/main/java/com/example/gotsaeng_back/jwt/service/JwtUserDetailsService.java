@@ -3,7 +3,6 @@ package com.example.gotsaeng_back.jwt.service;
 
 import com.example.gotsaeng_back.auth.entity.User;
 import com.example.gotsaeng_back.auth.service.UserService;
-import java.util.ArrayList;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,13 +17,20 @@ public class JwtUserDetailsService implements UserDetailsService {
     @Autowired
     private UserService userService;
 
+
+
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userService.findByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found with username: " + username);
+        User user= userService.findByUsername(username);
+        if(user==null){
+            throw new UsernameNotFoundException("사용자가 없습니다.");
         }
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
-                new ArrayList<>());
+        Hibernate.initialize(user.getRole());
+        org.springframework.security.core.userdetails.User.UserBuilder userBuilder = org.springframework.security.core.userdetails.User.withUsername(username);
+
+        userBuilder.roles(String.valueOf(user.getRole()));
+
+        return userBuilder.build();
     }
 }

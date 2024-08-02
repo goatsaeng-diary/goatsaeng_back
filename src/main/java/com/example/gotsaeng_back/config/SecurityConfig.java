@@ -1,5 +1,8 @@
 package com.example.gotsaeng_back.config;
 
+import com.example.gotsaeng_back.auth.oauth2.handler.CustomOAuth2FailureHandler;
+import com.example.gotsaeng_back.auth.oauth2.handler.CustomOAuth2SuccessHandler;
+import com.example.gotsaeng_back.auth.oauth2.service.CustomOAuth2UserService;
 import com.example.gotsaeng_back.jwt.exception.CustomAuthenticationEntryPoint;
 import com.example.gotsaeng_back.jwt.filter.JwtRequestFilter;
 import com.example.gotsaeng_back.jwt.service.JwtUserDetailsService;
@@ -24,14 +27,23 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-    @Autowired
-    private JwtRequestFilter jwtRequestFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-    @Autowired
-    private JwtUserDetailsService jwtUserDetailsService;
+
+    private final JwtRequestFilter jwtRequestFilter;
+
+
+    private final JwtUserDetailsService jwtUserDetailsService;
+
+
+    private final CustomOAuth2UserService customOAuth2UserService;
+
+
+    private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
+
+
+    private final CustomOAuth2FailureHandler customOAuth2FailureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -47,8 +59,16 @@ public class SecurityConfig {
                 )
                 .httpBasic(httpSecurityHttpBasicConfigurer -> httpSecurityHttpBasicConfigurer.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .oauth2Login(oauth2-> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService))
+                        .successHandler(customOAuth2SuccessHandler)
+                        .failureHandler(customOAuth2FailureHandler)
 
+                );
         return http.build();
     }
 
