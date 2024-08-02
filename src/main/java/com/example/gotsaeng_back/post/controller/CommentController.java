@@ -1,18 +1,18 @@
 package com.example.gotsaeng_back.post.controller;
 
-import com.example.gotsaeng_back.auth.entity.User;
 import com.example.gotsaeng_back.auth.service.UserService;
 import com.example.gotsaeng_back.global.response.controller.ApiResponse;
 import com.example.gotsaeng_back.jwt.util.JwtUtil;
-import com.example.gotsaeng_back.post.dto.CreateCommentDTO;
-import com.example.gotsaeng_back.post.dto.DeleteCommentDTO;
-import com.example.gotsaeng_back.post.dto.UpdateCommentDTO;
-import com.example.gotsaeng_back.post.entity.Comment;
+import com.example.gotsaeng_back.post.dto.comment.CreateCommentDTO;
+import com.example.gotsaeng_back.post.dto.comment.ShowCommentDTO;
+import com.example.gotsaeng_back.post.dto.comment.UpdateCommentDTO;
 import com.example.gotsaeng_back.post.entity.Post;
 import com.example.gotsaeng_back.post.service.CommentService;
 import com.example.gotsaeng_back.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/comment")
@@ -40,5 +40,12 @@ public class CommentController {
     @PostMapping("/update/{commentId}")
     public ApiResponse updateComment(@PathVariable("commentId") Long commentId, @RequestBody UpdateCommentDTO commentDTO, @RequestHeader("Authorization") String token){
         return commentService.updateById(commentId, token, commentDTO);
+    }
+
+    // 게시글별 댓글 리스트 불러오기
+    @GetMapping("/show/{postId}")
+    public ApiResponse<List<ShowCommentDTO>> showComment(@PathVariable("postId") Long postId) {
+        System.out.println("리스트 불러오기");
+        return commentService.findByPostId(postId);
     }
 }

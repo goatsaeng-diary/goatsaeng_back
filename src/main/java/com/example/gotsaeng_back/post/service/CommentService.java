@@ -1,14 +1,15 @@
 package com.example.gotsaeng_back.post.service;
 
 import com.example.gotsaeng_back.global.response.controller.ApiResponse;
-import com.example.gotsaeng_back.post.dto.CreateCommentDTO;
-import com.example.gotsaeng_back.post.dto.UpdateCommentDTO;
+import com.example.gotsaeng_back.post.dto.comment.CreateCommentDTO;
+import com.example.gotsaeng_back.post.dto.comment.ShowCommentDTO;
+import com.example.gotsaeng_back.post.dto.comment.UpdateCommentDTO;
 import com.example.gotsaeng_back.post.entity.Comment;
 
 import java.util.List;
 
 public interface CommentService {
-    List<Comment> findByPostId(Long postId);
+    ApiResponse<List<ShowCommentDTO>> findByPostId(Long postId);
 
     void save(CreateCommentDTO commentDTO, String token, Long postId);
 

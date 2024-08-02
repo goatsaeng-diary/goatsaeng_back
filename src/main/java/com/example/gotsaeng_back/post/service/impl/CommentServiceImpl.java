@@ -4,8 +4,9 @@ import com.example.gotsaeng_back.auth.entity.User;
 import com.example.gotsaeng_back.auth.service.UserService;
 import com.example.gotsaeng_back.global.response.controller.ApiResponse;
 import com.example.gotsaeng_back.jwt.util.JwtUtil;
-import com.example.gotsaeng_back.post.dto.CreateCommentDTO;
-import com.example.gotsaeng_back.post.dto.UpdateCommentDTO;
+import com.example.gotsaeng_back.post.dto.comment.CreateCommentDTO;
+import com.example.gotsaeng_back.post.dto.comment.ShowCommentDTO;
+import com.example.gotsaeng_back.post.dto.comment.UpdateCommentDTO;
 import com.example.gotsaeng_back.post.entity.Comment;
 import com.example.gotsaeng_back.post.entity.Post;
 import com.example.gotsaeng_back.post.repository.CommentRepository;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,8 +44,25 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.save(comment);
     }
 
-    public List<Comment> findByPostId(Long postId) {
-        return commentRepository.findByPostPostId(postId);
+    public ApiResponse<List<ShowCommentDTO>> findByPostId(Long postId) {
+        try {
+            List<Comment> comments = commentRepository.findByPostPostId(postId);
+            if (comments.isEmpty()) {
+                return new ApiResponse<>(false, "댓글이 없습니다.", null);
+            }
+            List<ShowCommentDTO> commentDto = comments.stream()
+                    .map(comment -> new ShowCommentDTO(
+                            comment.getCommentId(),
+                            comment.getPost().getPostId(),
+                            comment.getContent(),
+                            comment.getCreatedDate(),
+                            comment.getUser().getUsername()
+                    ))
+                    .collect(Collectors.toList());
+            return new ApiResponse<>(true, "댓글 리스트 조회 성공", commentDto);
+        } catch (Exception e) {
+            return new ApiResponse<>(false, "내부 서버 오류: " + e.getMessage(), null);
+        }
     }
 
     public Comment findById(Long id) {
