@@ -8,7 +8,6 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -22,7 +21,6 @@ public class User {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(nullable = false)
     private String username;
 
     private String password;
@@ -33,7 +31,7 @@ public class User {
     @Column(nullable = false)
     private String email;
 
-    @Column(name = "birth_date", nullable = false)
+    @Column(name = "birth_date")
     private LocalDate birthDate;
 
     @Column(name = "registration_date", nullable = false)
@@ -41,17 +39,16 @@ public class User {
 
     private String provider;
 
-    @Column(name = "social_id")
-    private int socialId;
-
     @Column(name = "total_point")
     private Long totalPoint = 0L;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles;
+
+
+    @Column(name = "role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RoleType role;
+
+    public enum RoleType {
+        USER, ADMIN
+    }
 }

@@ -22,7 +22,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     }
     private void handleRestResponse(HttpServletRequest request, HttpServletResponse response, String exception) throws IOException {
-        log.error("Rest Request - Commence Get Exception : {}", exception);
 
         if (exception != null) {
             if (exception.equals(JwtExceptionCode.INVALID_TOKEN.getCode())) {

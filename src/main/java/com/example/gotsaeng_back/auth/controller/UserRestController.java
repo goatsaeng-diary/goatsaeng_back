@@ -37,16 +37,19 @@ public class UserRestController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        String accessToken = jwtUtil.generateAccessToken(username);
-        String refreshToken = jwtUtil.generateRefreshToken(username);
-
-
+        String accessToken = jwtUtil.createAccessToken(user.getUserId(),user.getEmail(),user.getUsername(),user.getRole());
+        String refreshToken = jwtUtil.createRefreshToken(user.getUserId(),user.getEmail(),user.getUsername(),user.getRole());
 
         return ResponseEntity.ok(new TokenDto(accessToken, refreshToken));
     }
     @PostMapping("/userreg")
-    public User userreg(@RequestBody User user){
-        return userService.regUser(user);
+    public ResponseEntity<?> userreg(@RequestBody User user){
+        User regUser = userService.regUser(user);
+        if (regUser!=null){
+            return ResponseEntity.ok("회원가입 완료");
+        }else{
+            return ResponseEntity.ok("회원가입 실패");
+        }
     }
 
     @GetMapping("/userList")
