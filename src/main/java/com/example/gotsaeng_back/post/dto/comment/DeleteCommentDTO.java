@@ -1,6 +1,5 @@
-package com.example.gotsaeng_back.post.dto;
+package com.example.gotsaeng_back.post.dto.comment;
 
-import com.example.gotsaeng_back.auth.entity.User;
 import lombok.Getter;
 import lombok.Setter;
 

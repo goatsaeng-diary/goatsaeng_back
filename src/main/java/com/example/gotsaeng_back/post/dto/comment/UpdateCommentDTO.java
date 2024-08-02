@@ -1,4 +1,4 @@
-package com.example.gotsaeng_back.post.dto;
+package com.example.gotsaeng_back.post.dto.comment;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
