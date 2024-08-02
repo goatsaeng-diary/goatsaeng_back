@@ -14,6 +14,7 @@ import com.example.gotsaeng_back.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -78,6 +79,7 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
+    //댓글 수정
     @Override
     public ApiResponse updateById(Long commentId, String token, UpdateCommentDTO commentDto) {
         try {
@@ -102,6 +104,7 @@ public class CommentServiceImpl implements CommentService {
 
             // 댓글 수정
             comment.setContent(commentDto.getContent());
+            comment.setCreatedDate(LocalDateTime.now());
             commentRepository.save(comment);
 
             return new ApiResponse<>(true, "댓글 수정 성공");
