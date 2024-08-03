@@ -30,7 +30,7 @@ public class CommentServiceImpl implements CommentService {
     //댓글 추가
     public void save(CreateCommentDTO commentDTO, String token, Long postId) {
         // JWT 토큰에서 사용자 이름 추출
-        String username = jwtUtil.getUsernameFromAccessToken(token);
+        String username = jwtUtil.getUserNameFromToken(token);
 
         // 사용자 정보 조회
         User user = userService.findByUsername(username);
@@ -73,7 +73,7 @@ public class CommentServiceImpl implements CommentService {
     public ApiResponse deleteById(Long commentId, String token) {
         try {
             // JWT 토큰에서 사용자 이름 추출
-            String username = jwtUtil.getUsernameFromAccessToken(token);
+            String username = jwtUtil.getUserNameFromToken(token);
 
             // 사용자 정보 조회
             User user = userService.findByUsername(username);
@@ -103,7 +103,7 @@ public class CommentServiceImpl implements CommentService {
     public ApiResponse updateById(Long commentId, String token, UpdateCommentDTO commentDto) {
         try {
             // JWT 토큰에서 사용자 이름 추출
-            String username = jwtUtil.getUsernameFromAccessToken(token);
+            String username = jwtUtil.getUserNameFromToken(token);
 
             // 사용자 정보 조회
             User user = userService.findByUsername(username);
