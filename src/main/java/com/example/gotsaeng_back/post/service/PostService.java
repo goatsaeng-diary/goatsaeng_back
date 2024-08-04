@@ -6,4 +6,6 @@ public interface PostService {
     void savePost(Post post);
 
     Post getByPostId(Long postId);
+
+    void deletePost(Long postId);
 }
