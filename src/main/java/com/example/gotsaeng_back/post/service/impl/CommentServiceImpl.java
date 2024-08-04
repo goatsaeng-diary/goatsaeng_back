@@ -65,10 +65,6 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
-    public Comment findById(Long id) {
-        return commentRepository.findById(id).orElse(null);
-    }
-
     //댓글 삭제
     public ApiResponse deleteById(Long commentId, String token) {
         try {
@@ -131,4 +127,9 @@ public class CommentServiceImpl implements CommentService {
             return new ApiResponse<>(false, "내부 서버 오류: " + e.getMessage());
         }
     }
+
+    public Comment findById(Long id) {
+        return commentRepository.findById(id).orElse(null);
+    }
+
 }
