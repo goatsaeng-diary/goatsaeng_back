@@ -34,11 +34,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User regUser(User user){
-//        Role userRole = Role.findByAuthority("USER");
-//        // 사용자에게 역할 할당
-//        Set<Authority> roles = new HashSet<>();
-//        roles.add(userRole);
-//        user.setAuthorities(roles);
+        user.setRole(RoleType.USER);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
@@ -132,4 +128,10 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
 
     }
+
+    @Override
+    public User findById(Long userId) {
+        return userRepository.findById(userId).orElse(null);
+    }
+
 }

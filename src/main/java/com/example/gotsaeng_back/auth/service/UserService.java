@@ -18,4 +18,5 @@ public interface UserService {
     void deleteUser(Long userId);
     void deleteCookie(HttpServletResponse response);
     User saveOrUpdateUser(User user);
+    User findById(Long userId);
 }
