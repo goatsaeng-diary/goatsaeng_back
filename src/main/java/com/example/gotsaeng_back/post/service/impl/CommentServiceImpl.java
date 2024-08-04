@@ -50,7 +50,7 @@ public class CommentServiceImpl implements CommentService {
             if (comments.isEmpty()) {
                 return new ApiResponse<>(false, "댓글이 없습니다.", null);
             }
-            List<ShowCommentDTO> commentDto = comments.stream()
+            List<ShowCommentDTO> commentDtoList = comments.stream()
                     .map(comment -> new ShowCommentDTO(
                             comment.getCommentId(),
                             comment.getPost().getPostId(),
@@ -59,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
                             comment.getUser().getUsername()
                     ))
                     .collect(Collectors.toList());
-            return new ApiResponse<>(true, "댓글 리스트 조회 성공", commentDto);
+            return new ApiResponse<>(true, "댓글 리스트 조회 성공", commentDtoList);
         } catch (Exception e) {
             return new ApiResponse<>(false, "내부 서버 오류: " + e.getMessage(), null);
         }
