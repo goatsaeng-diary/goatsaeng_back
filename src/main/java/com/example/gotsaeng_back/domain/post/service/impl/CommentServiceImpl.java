@@ -8,7 +8,7 @@ import com.example.gotsaeng_back.domain.post.entity.Post;
 import com.example.gotsaeng_back.domain.post.repository.CommentRepository;
 import com.example.gotsaeng_back.domain.post.service.CommentService;
 import com.example.gotsaeng_back.domain.post.service.PostService;
-import com.example.gotsaeng_back.global.response.controller.ApiResponse;
+import com.example.gotsaeng_back.global.response.CustomResponse;
 import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
 import com.example.gotsaeng_back.domain.post.dto.comment.CreateCommentDTO;
 import com.example.gotsaeng_back.domain.post.entity.Comment;
@@ -44,11 +44,11 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.save(comment);
     }
 
-    public ApiResponse<List<ShowCommentDTO>> findByPostId(Long postId) {
+    public CustomResponse<List<ShowCommentDTO>> findByPostId(Long postId) {
         try {
             List<Comment> comments = commentRepository.findByPostPostId(postId);
             if (comments.isEmpty()) {
-                return new ApiResponse<>(false, "댓글이 없습니다.", null);
+                return new CustomResponse<>(false, "댓글이 없습니다.", null);
             }
             List<ShowCommentDTO> commentDto = comments.stream()
                     .map(comment -> new ShowCommentDTO(
@@ -59,9 +59,9 @@ public class CommentServiceImpl implements CommentService {
                             comment.getUser().getUsername()
                     ))
                     .collect(Collectors.toList());
-            return new ApiResponse<>(true, "댓글 리스트 조회 성공", commentDto);
+            return new CustomResponse<>(true, "댓글 리스트 조회 성공", commentDto);
         } catch (Exception e) {
-            return new ApiResponse<>(false, "내부 서버 오류: " + e.getMessage(), null);
+            return new CustomResponse<>(false, "내부 서버 오류: " + e.getMessage(), null);
         }
     }
 
@@ -70,7 +70,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     //댓글 삭제
-    public ApiResponse deleteById(Long commentId, String token) {
+    public CustomResponse deleteById(Long commentId, String token) {
         try {
             // JWT 토큰에서 사용자 이름 추출
             String username = jwtUtil.getUserNameFromToken(token);
@@ -81,26 +81,26 @@ public class CommentServiceImpl implements CommentService {
 
             Comment comment = findById(commentId);
             if (comment == null) {
-                return new ApiResponse<>(false, "댓글을 찾을 수 없습니다.");
+                return new CustomResponse<>(false, "댓글을 찾을 수 없습니다.");
             }
 
             Long commentUserId = comment.getUser().getUserId();
 
             // 사용자와 댓글 작성자가 일치하는지 확인
             if (!userId.equals(commentUserId)) {
-                return new ApiResponse<>(false, "댓글 삭제 권한이 없습니다.");
+                return new CustomResponse<>(false, "댓글 삭제 권한이 없습니다.");
             }
 
             commentRepository.deleteById(commentId);
-            return new ApiResponse<>(true, "댓글 삭제 성공");
+            return new CustomResponse<>(true, "댓글 삭제 성공");
         } catch (Exception e) {
-            return new ApiResponse<>(false, "내부 서버 오류: " + e.getMessage());
+            return new CustomResponse<>(false, "내부 서버 오류: " + e.getMessage());
         }
     }
 
     //댓글 수정
     @Override
-    public ApiResponse updateById(Long commentId, String token, UpdateCommentDTO commentDto) {
+    public CustomResponse updateById(Long commentId, String token, UpdateCommentDTO commentDto) {
         try {
             // JWT 토큰에서 사용자 이름 추출
             String username = jwtUtil.getUserNameFromToken(token);
@@ -111,14 +111,14 @@ public class CommentServiceImpl implements CommentService {
 
             Comment comment = findById(commentId);
             if (comment == null) {
-                return new ApiResponse<>(false, "댓글을 찾을 수 없습니다.");
+                return new CustomResponse<>(false, "댓글을 찾을 수 없습니다.");
             }
 
             Long commentUserId = comment.getUser().getUserId();
 
             // 사용자와 댓글 작성자가 일치하는지 확인
             if (!userId.equals(commentUserId)) {
-                return new ApiResponse<>(false, "댓글 수정 권한이 없습니다.");
+                return new CustomResponse<>(false, "댓글 수정 권한이 없습니다.");
             }
 
             // 댓글 수정
@@ -126,9 +126,9 @@ public class CommentServiceImpl implements CommentService {
             comment.setCreatedDate(LocalDateTime.now());
             commentRepository.save(comment);
 
-            return new ApiResponse<>(true, "댓글 수정 성공");
+            return new CustomResponse<>(true, "댓글 수정 성공");
         } catch (Exception e) {
-            return new ApiResponse<>(false, "내부 서버 오류: " + e.getMessage());
+            return new CustomResponse<>(false, "내부 서버 오류: " + e.getMessage());
         }
     }
 }
