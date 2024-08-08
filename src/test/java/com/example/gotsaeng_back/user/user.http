@@ -1,9 +1,9 @@
 ### Register a new user
-POST http://localhost:8080/api/user/userreg
+POST http://localhost:8080/api/user/sign-up
 Content-Type: application/json
 
 {
-  "username": "user6",
+  "username": "user7",
   "password": "1234",
   "name": "정호현",
   "email": "asdf@naver.com",
@@ -15,7 +15,7 @@ Content-Type: application/json
 POST http://localhost:8080/api/user/login
 Content-Type: application/x-www-form-urlencoded
 
-username=user6&password=1234
+username=user7&password=1234
 
 ### userList request
 GET http://localhost:8080/api/user/userList
