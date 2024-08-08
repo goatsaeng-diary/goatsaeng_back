@@ -1,18 +1,20 @@
 package com.example.gotsaeng_back.domain.auth.controller;
 
 
-import com.example.gotsaeng_back.auth.dto.TokenDto;
-import com.example.gotsaeng_back.auth.entity.User;
-import com.example.gotsaeng_back.auth.service.UserService;
-import com.example.gotsaeng_back.global.response.controller.ApiResponse;
-import com.example.gotsaeng_back.jwt.util.JwtUtil;
+import static com.example.gotsaeng_back.global.exception.ExceptionEnum.DUPLICATE;
+import static com.example.gotsaeng_back.global.exception.ExceptionEnum.INTERNAL_SERVER_ERROR;
 
+import com.example.gotsaeng_back.domain.auth.dto.TokenDto;
+import com.example.gotsaeng_back.domain.auth.dto.UserUpdateDto;
+import com.example.gotsaeng_back.domain.auth.entity.User;
+import com.example.gotsaeng_back.domain.auth.service.UserService;
+import com.example.gotsaeng_back.global.exception.ApiException;
+import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
+import com.example.gotsaeng_back.global.response.CustomResponse;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,73 +36,47 @@ public class UserRestController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("/login")
-    public ApiResponse<?> login(@RequestParam("username") String username,
-                                @RequestParam("password") String password,
-                                HttpServletResponse response) {
-        User user = userService.findByUsername(username);
-        if(user==null){
-            return new ApiResponse<>(false,"로그인실패");
-        }
-        if(!passwordEncoder.matches(password, user.getPassword())){
-            return new ApiResponse<>(false,"로그인실패");
-        }
-
+    public CustomResponse<TokenDto> login(@RequestParam("username") String username,
+                                   @RequestParam("password") String password,
+                                   HttpServletResponse response) {
+        User user = userService.userLogin(username,password);
         String accessToken = jwtUtil.createAccessToken(user.getUserId(),user.getEmail(),user.getUsername(),user.getRole());
         String refreshToken = jwtUtil.createRefreshToken(user.getUserId(),user.getEmail(),user.getUsername(),user.getRole());
         TokenDto tokenDto = new TokenDto(accessToken,refreshToken);
-        return new ApiResponse<>(true,"토큰발급",tokenDto);
+        return new CustomResponse<>(HttpStatus.OK,"토큰발급",tokenDto);
     }
     @PostMapping("/sign-up")
-    public ApiResponse<?> userreg(@RequestBody User user){
-        User regUser = userService.regUser(user);
-        if (regUser!=null){
-            return new ApiResponse<>(true,"회원가입 완료");
-        }else{
-            return new ApiResponse<>(false,"회원가입 실패");
-
-        }
+    public CustomResponse<Void> userreg(@RequestBody User user){
+        userService.regUser(user);
+        return new CustomResponse<>(HttpStatus.OK,"success",null);
     }
 
     @PostMapping("/logout")
-    public ApiResponse<?>logout(HttpServletResponse response){
+    public CustomResponse<Void> logout(HttpServletResponse response){
         //프론트랑 연결 후 로그아웃 구현
         return null;
     }
 
     @DeleteMapping("/withdraw")
-    public ApiResponse<?>withdrawUser(@RequestHeader("Authorization") String token){
+    public CustomResponse<Void> withdrawUser(@RequestHeader("Authorization") String token){
         Long userId = jwtUtil.getUserIdFromToken(token);
         userService.deleteUser(userId);
-        User user = userService.findById(userId);
-        if(user!=null){
-            return new ApiResponse<>(false,"회원탈퇴실패");
-        }else{
-            return new ApiResponse<>(true,"회원탈퇴성공");
-        }
+        return new CustomResponse<>(HttpStatus.OK,"success",null);
     }
-//    @GetMapping("/userList")
-//    public List<User> userList(@RequestHeader("Authorization") String token){
-//        System.out.println(jwtUtil.getUserIdFromToken(token)+"123123");
-//        return userService.userList();
-//    }
 
     @PostMapping("/update")
-    public ApiResponse<?> userUpdate(@RequestBody User user){
-        User updateUser = userService.saveOrUpdateUser(user);
-        if (updateUser!=null){
-            return new ApiResponse<>(true,"수정 완료");
-        }else{
-            return new ApiResponse<>(false,"수정 실패");
-
-        }
+    public CustomResponse<UserUpdateDto> userUpdate(@RequestBody User user,@RequestHeader("Authorization") String token){
+        Long userId = jwtUtil.getUserIdFromToken(token);
+        UserUpdateDto updateUser = userService.updateUser(user,userId);
+        return new CustomResponse<>(HttpStatus.OK,"success",updateUser);
     }
     @GetMapping("/duplicate")
-    public ApiResponse<?> userDuplicate(@RequestParam String username){
+    public CustomResponse<?> userDuplicate(@RequestParam String username){
         User duplicateUser = userService.findByUsername(username);
         if(duplicateUser.getUserId()!=null){
-            return new ApiResponse<>(false,"중복된 아이디입니다",duplicateUser.getUsername());
+            throw new ApiException(DUPLICATE);
         }else{
-            return new ApiResponse<>(true , "사용 가능한 아이디 입니다",duplicateUser.getUsername());
+            return new CustomResponse<>(HttpStatus.OK,"사용 가능한 아이디 입니다.",duplicateUser.getUsername());
         }
     }
 }
