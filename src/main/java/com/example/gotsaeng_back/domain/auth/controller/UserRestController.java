@@ -2,8 +2,9 @@ package com.example.gotsaeng_back.domain.auth.controller;
 
 
 import static com.example.gotsaeng_back.global.exception.ExceptionEnum.DUPLICATE;
-import static com.example.gotsaeng_back.global.exception.ExceptionEnum.INTERNAL_SERVER_ERROR;
 
+import com.example.gotsaeng_back.domain.auth.dto.LoginDto;
+import com.example.gotsaeng_back.domain.auth.dto.SignUpDto;
 import com.example.gotsaeng_back.domain.auth.dto.TokenDto;
 import com.example.gotsaeng_back.domain.auth.dto.UserUpdateDto;
 import com.example.gotsaeng_back.domain.auth.entity.User;
@@ -28,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class UserRestController {
     private final UserService userService;
@@ -36,18 +37,16 @@ public class UserRestController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("/login")
-    public CustomResponse<TokenDto> login(@RequestParam("username") String username,
-                                   @RequestParam("password") String password,
-                                   HttpServletResponse response) {
-        User user = userService.userLogin(username,password);
+    public CustomResponse<TokenDto> login(@RequestBody LoginDto loginDto) {
+        User user = userService.userLogin(loginDto.getUsername(),loginDto.getPassword());
         String accessToken = jwtUtil.createAccessToken(user.getUserId(),user.getEmail(),user.getUsername(),user.getRole());
         String refreshToken = jwtUtil.createRefreshToken(user.getUserId(),user.getEmail(),user.getUsername(),user.getRole());
         TokenDto tokenDto = new TokenDto(accessToken,refreshToken);
         return new CustomResponse<>(HttpStatus.OK,"토큰발급",tokenDto);
     }
     @PostMapping("/sign-up")
-    public CustomResponse<Void> userreg(@RequestBody User user){
-        userService.regUser(user);
+    public CustomResponse<Void> userreg(@RequestBody SignUpDto signUpDto){
+        userService.regUser(signUpDto);
         return new CustomResponse<>(HttpStatus.OK,"success",null);
     }
 
@@ -64,14 +63,14 @@ public class UserRestController {
         return new CustomResponse<>(HttpStatus.OK,"success",null);
     }
 
-    @PostMapping("/update")
-    public CustomResponse<UserUpdateDto> userUpdate(@RequestBody User user,@RequestHeader("Authorization") String token){
-        Long userId = jwtUtil.getUserIdFromToken(token);
-        UserUpdateDto updateUser = userService.updateUser(user,userId);
-        return new CustomResponse<>(HttpStatus.OK,"success",updateUser);
-    }
-    @GetMapping("/duplicate")
-    public CustomResponse<?> userDuplicate(@RequestParam String username){
+//    @PostMapping("/update")
+//    public CustomResponse<UserUpdateDto> userUpdate(@RequestBody User user,@RequestHeader("Authorization") String token){
+//        Long userId = jwtUtil.getUserIdFromToken(token);
+//        UserUpdateDto updateUser = userService.updateUser(user,userId);
+//        return new CustomResponse<>(HttpStatus.OK,"success",updateUser);
+//    }
+    @GetMapping("/check-username")
+    public CustomResponse<?> userDuplicate(@RequestBody String username){
         User duplicateUser = userService.findByUsername(username);
         if(duplicateUser.getUserId()!=null){
             throw new ApiException(DUPLICATE);

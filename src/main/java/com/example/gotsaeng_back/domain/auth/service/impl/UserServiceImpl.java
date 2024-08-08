@@ -3,6 +3,7 @@ package com.example.gotsaeng_back.domain.auth.service.impl;
 import static com.example.gotsaeng_back.global.exception.ExceptionEnum.ACCESS_DENIED_EXCEPTION;
 import static com.example.gotsaeng_back.global.exception.ExceptionEnum.INTERNAL_SERVER_ERROR;
 
+import com.example.gotsaeng_back.domain.auth.dto.SignUpDto;
 import com.example.gotsaeng_back.domain.auth.dto.UserUpdateDto;
 import com.example.gotsaeng_back.domain.auth.entity.User;
 import com.example.gotsaeng_back.domain.auth.entity.User.RoleType;
@@ -10,7 +11,6 @@ import com.example.gotsaeng_back.domain.auth.oauth2.dto.OAuthAttributes;
 import com.example.gotsaeng_back.domain.auth.repository.UserRepository;
 import com.example.gotsaeng_back.domain.auth.service.UserService;
 import com.example.gotsaeng_back.global.exception.ApiException;
-import com.example.gotsaeng_back.global.exception.ExceptionEnum;
 import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,11 +39,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void regUser(User user){
+    public void regUser(SignUpDto dto){
+        User user = new User();
         try{
             user.setRole(RoleType.USER);
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
             user.setRegistrationDate(LocalDateTime.now());
+            user.setEmail(dto.getEmail());
+            user.setUsername(dto.getUsername());
+            user.setBirthDate(dto.getBirthDate());
+            user.setName(dto.getName());
+            user.setTotalPoint(0L);
+            user.setNickname(dto.getNickname());
         }catch (Exception e){
             throw new ApiException(INTERNAL_SERVER_ERROR);
         }

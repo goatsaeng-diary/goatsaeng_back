@@ -1,5 +1,6 @@
 package com.example.gotsaeng_back.domain.auth.service;
 
+import com.example.gotsaeng_back.domain.auth.dto.SignUpDto;
 import com.example.gotsaeng_back.domain.auth.dto.UserUpdateDto;
 import com.example.gotsaeng_back.domain.auth.entity.User;
 import com.example.gotsaeng_back.domain.auth.oauth2.dto.OAuthAttributes;
@@ -10,7 +11,7 @@ import java.util.List;
 public interface UserService {
 
     User findByUsername(String username);
-    void regUser(User user);
+    void regUser(SignUpDto signUpDto);
     List<User> userList();
     User saveOrUpdate(OAuthAttributes attributes);
     User findByEmail(String email);
