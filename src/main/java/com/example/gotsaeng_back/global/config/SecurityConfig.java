@@ -86,6 +86,7 @@ public class SecurityConfig {
         config.addAllowedMethod("*");
         config.setAllowedMethods(List.of("GET", "POST", "DELETE", "PATCH", "OPTIONS", "PUT"));
         config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of("http://localhost:3000"));
         source.registerCorsConfiguration("/**", config);
         return source;
     }

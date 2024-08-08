@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -42,19 +43,14 @@ public class UserRestController {
         String accessToken = jwtUtil.createAccessToken(user.getUserId(),user.getEmail(),user.getUsername(),user.getRole());
         String refreshToken = jwtUtil.createRefreshToken(user.getUserId(),user.getEmail(),user.getUsername(),user.getRole());
         TokenDto tokenDto = new TokenDto(accessToken,refreshToken);
-        return new CustomResponse<>(HttpStatus.OK,"토큰발급",tokenDto);
+        return new CustomResponse<>(HttpStatus.OK,"환영합니다",tokenDto);
     }
     @PostMapping("/sign-up")
     public CustomResponse<Void> userreg(@RequestBody SignUpDto signUpDto){
         userService.regUser(signUpDto);
-        return new CustomResponse<>(HttpStatus.OK,"success",null);
+        return new CustomResponse<>(HttpStatus.OK,"회원가입이 완료되었습니다.",null);
     }
 
-    @PostMapping("/logout")
-    public CustomResponse<Void> logout(HttpServletResponse response){
-        //프론트랑 연결 후 로그아웃 구현
-        return null;
-    }
 
     @DeleteMapping("/withdraw")
     public CustomResponse<Void> withdrawUser(@RequestHeader("Authorization") String token){
@@ -69,13 +65,16 @@ public class UserRestController {
 //        UserUpdateDto updateUser = userService.updateUser(user,userId);
 //        return new CustomResponse<>(HttpStatus.OK,"success",updateUser);
 //    }
-    @GetMapping("/check-username")
-    public CustomResponse<?> userDuplicate(@RequestBody String username){
+    @GetMapping("/check-username/{username}")
+    public CustomResponse<?> userDuplicate(@PathVariable("username") String username){
         User duplicateUser = userService.findByUsername(username);
-        if(duplicateUser.getUserId()!=null){
+        System.out.println(username);
+        System.out.println(duplicateUser);
+        if(duplicateUser!=null){
             throw new ApiException(DUPLICATE);
         }else{
-            return new CustomResponse<>(HttpStatus.OK,"사용 가능한 아이디 입니다.",duplicateUser.getUsername());
+            System.out.println("사용가능");
+            return new CustomResponse<>(HttpStatus.OK,"사용 가능한 아이디 입니다.",username);
         }
     }
 }
