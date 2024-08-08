@@ -6,6 +6,7 @@ import com.example.gotsaeng_back.domain.post.dto.PostCreateDTO;
 import com.example.gotsaeng_back.domain.post.entity.Post;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,6 @@ public class PostController {
         post.setContent(postCreateDTO.getContent());
         postService.savePost(post);
 
-        return new CustomResponse<>(true,"게시물 작성 성공");
+        return new CustomResponse<>(HttpStatus.OK,"게시물 작성 성공", null);
    }
 }
