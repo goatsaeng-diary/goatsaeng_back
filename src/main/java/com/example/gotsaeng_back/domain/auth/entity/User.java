@@ -46,8 +46,6 @@ public class User {
     private Long totalPoint = 0L;
 
 
-
-    @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private RoleType role;
 

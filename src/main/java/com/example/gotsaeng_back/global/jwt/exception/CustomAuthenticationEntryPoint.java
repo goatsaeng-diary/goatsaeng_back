@@ -17,11 +17,13 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
-        String exception = (String)request.getAttribute("exception");
-        handleRestResponse(request,response, exception);
+        String exception = (String) request.getAttribute("exception");
+        handleRestResponse(request, response, exception);
 
     }
-    private void handleRestResponse(HttpServletRequest request, HttpServletResponse response, String exception) throws IOException {
+
+    private void handleRestResponse(HttpServletRequest request, HttpServletResponse response, String exception)
+            throws IOException {
 
         if (exception != null) {
             if (exception.equals(JwtExceptionCode.INVALID_TOKEN.getCode())) {
@@ -43,6 +45,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             setResponse(response, JwtExceptionCode.UNKNOWN_ERROR);
         }
     }
+
     private void setResponse(HttpServletResponse response, JwtExceptionCode exceptionCode) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -54,4 +57,5 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         String responseJson = gson.toJson(errorInfo);
         response.getWriter().print(responseJson);
     }
+}
 
