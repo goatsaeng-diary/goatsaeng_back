@@ -22,7 +22,7 @@ public class Comment {
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
-    private Post postId;
+    private Post post;
 
     @Column(name = "content", nullable = false)
     private String content;
