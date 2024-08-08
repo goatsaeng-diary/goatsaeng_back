@@ -1,10 +1,10 @@
 package com.example.gotsaeng_back.domain.auth.oauth2.dto;
 
-import java.util.Map;
-import java.util.UUID;
-
 import lombok.Builder;
 import lombok.Getter;
+
+import java.util.Map;
+import java.util.UUID;
 
 @Getter
 @Builder

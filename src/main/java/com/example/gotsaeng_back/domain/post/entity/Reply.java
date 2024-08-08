@@ -1,5 +1,7 @@
 package com.example.gotsaeng_back.domain.post.entity;
 
+import com.example.gotsaeng_back.domain.auth.entity.User;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,5 +30,10 @@ public class Reply {
 
     @ManyToOne
     @JoinColumn(name = "comment_id", nullable = false)
-    private Comment commentId;
+    private Comment comment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
 }
