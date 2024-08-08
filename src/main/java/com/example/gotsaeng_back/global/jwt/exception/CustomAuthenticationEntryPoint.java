@@ -54,4 +54,4 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         String responseJson = gson.toJson(errorInfo);
         response.getWriter().print(responseJson);
     }
-}
+

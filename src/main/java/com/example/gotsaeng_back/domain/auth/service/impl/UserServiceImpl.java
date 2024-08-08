@@ -1,21 +1,22 @@
 package com.example.gotsaeng_back.domain.auth.service.impl;
 
-import com.example.gotsaeng_back.auth.entity.User.RoleType;
 import com.example.gotsaeng_back.domain.auth.entity.User;
+import com.example.gotsaeng_back.domain.auth.entity.User.RoleType;
 import com.example.gotsaeng_back.domain.auth.oauth2.dto.OAuthAttributes;
 import com.example.gotsaeng_back.domain.auth.repository.UserRepository;
 import com.example.gotsaeng_back.domain.auth.service.UserService;
-import com.example.gotsaeng_back.jwt.util.JwtUtil;
+import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

@@ -48,4 +48,4 @@ public class CommentController {
         System.out.println("리스트 불러오기");
         return commentService.findByPostId(postId);
     }
-}
+

@@ -131,4 +131,3 @@ public class CommentServiceImpl implements CommentService {
             return new CustomResponse<>(false, "내부 서버 오류: " + e.getMessage());
         }
     }
-}
