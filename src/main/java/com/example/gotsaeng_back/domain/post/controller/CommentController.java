@@ -20,24 +20,24 @@ public class CommentController {
     @PostMapping("/create/{postId}")
     public CustomResponse<Void> createComment(@PathVariable Long postId, @RequestBody CreateCommentDTO commentDTO, @RequestHeader("Authorization") String token) {
         commentService.save(commentDTO, token, postId);
-        return new CustomResponse<>(HttpStatus.OK, "댓글 작성 성공", null);
+        return new CustomResponse<>(HttpStatus.OK, "댓글 작성을 완료했습니다.", null);
     }
 
     @DeleteMapping("/delete/{commentId}")
     public CustomResponse<Void> deleteComment(@PathVariable("commentId") Long commentId, @RequestHeader("Authorization") String token) {
         commentService.deleteById(commentId, token);
-        return new CustomResponse<>(HttpStatus.OK, "댓글 삭제 성공", null);
+        return new CustomResponse<>(HttpStatus.OK, "댓글을 삭제했습니다.", null);
     }
 
     @PostMapping("/update/{commentId}")
     public CustomResponse<Void> updateComment(@PathVariable("commentId") Long commentId, @RequestBody UpdateCommentDTO commentDTO, @RequestHeader("Authorization") String token) {
         commentService.updateById(commentId, token, commentDTO);
-        return new CustomResponse<>(HttpStatus.OK, "댓글 수정 성공", null);
+        return new CustomResponse<>(HttpStatus.OK, "댓글을 수정했습니다", null);
     }
 
     @GetMapping("/show/{postId}")
     public CustomResponse<List<ShowCommentDTO>> showComment(@PathVariable("postId") Long postId) {
         List<ShowCommentDTO> comments = commentService.findByPostId(postId);
-        return new CustomResponse<>(HttpStatus.OK, "댓글 리스트 조회 성공", comments);
+        return new CustomResponse<>(HttpStatus.OK, "댓글 리스트를 조회했습니다.", comments);
     }
 }
