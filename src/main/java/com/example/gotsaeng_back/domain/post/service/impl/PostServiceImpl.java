@@ -3,7 +3,9 @@ package com.example.gotsaeng_back.domain.post.service.impl;
 import com.example.gotsaeng_back.domain.auth.entity.User;
 import com.example.gotsaeng_back.domain.auth.service.UserService;
 import com.example.gotsaeng_back.domain.post.dto.post.PostCreateDTO;
+import com.example.gotsaeng_back.domain.post.dto.post.PostDetailDTO;
 import com.example.gotsaeng_back.domain.post.dto.post.PostEditDTO;
+import com.example.gotsaeng_back.domain.post.dto.post.PostListDTO;
 import com.example.gotsaeng_back.domain.post.entity.Post;
 import com.example.gotsaeng_back.domain.post.repository.PostRepository;
 import com.example.gotsaeng_back.domain.post.service.PostService;
@@ -15,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -61,6 +65,51 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public void deletePost(Long postId) {
         postRepository.deleteById(postId);
+    }
+
+    @Override
+    public PostListDTO userPost(Long userId) {
+        List<Post> posts = postRepository.findAllByUser(userService.findById(userId));
+        PostListDTO postListDTO = new PostListDTO();
+        List<PostDetailDTO> postDetailDTOList = postListDTO.getPosts();
+        for (Post post : posts) {
+            PostDetailDTO postDetailDTO = PostDetailDTO.builder()
+                    .title(post.getTitle())
+                    .content(post.getContent())
+                    .nickname(post.getUser().getNickname())
+                    .build();
+            postDetailDTOList.add(postDetailDTO);
+        }
+        postListDTO.setPosts(postDetailDTOList);
+        return postListDTO;
+    }
+
+    @Override
+    public PostDetailDTO postDetails(Long postId) {
+        Post post = postRepository.findByPostId(postId);
+        return PostDetailDTO.builder()
+                    .title(post.getTitle())
+                    .content(post.getContent())
+                    .nickname(post.getUser().getNickname())
+                    .build();
+    }
+
+    @Override
+    public PostListDTO allPosts() {
+        List<Post> posts = postRepository.findAll();
+        PostListDTO postListDTO = new PostListDTO();
+        List<PostDetailDTO> postDetailDTOList = postListDTO.getPosts();
+        for (Post post : posts) {
+            PostDetailDTO postDetailDTO = PostDetailDTO.builder()
+                    .title(post.getTitle())
+                    .content(post.getContent())
+                    .nickname(post.getUser().getNickname())
+                    .build();
+            postDetailDTOList.add(postDetailDTO);
+        }
+        postListDTO.setPosts(postDetailDTOList);
+        return postListDTO;
+
     }
 
 }
