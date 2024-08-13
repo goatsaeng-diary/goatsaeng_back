@@ -13,6 +13,8 @@ public enum ExceptionEnum {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "서버 오류 발생"),
     FORBIDDEN(HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다."),
     DUPLICATE(HttpStatus.CONFLICT,"DUPLICATED" , "중복된 아이디 입니다"),
+    DUPLICATEMAIL(HttpStatus.CONFLICT,"DUPLICATEDEMAIL" , "중복된 이메일 입니다"),
+
     // Token Exception
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "EXPIRED_TOKEN", "토큰이 만료되었습니다."),
     EXPIRED_TOKEN2(HttpStatus.UNAUTHORIZED, "EXPIRED_TOKEN", "토큰 유효성 실패"),
@@ -29,6 +31,8 @@ public enum ExceptionEnum {
     FAIL_EMAIL_SEND(HttpStatus.BAD_REQUEST,"FAIL_EMAIL_SEND","이메일 발송 오류"),
     NOT_ALLOW_FILED(HttpStatus.BAD_REQUEST, "NOT_ALLOW_FILED", "이메일 혹은 비밀번호 형식이 틀립니다."),
     DIFFERENT_PASSWORD(HttpStatus.BAD_REQUEST, "DIFFERENT_PASSWORD", "비밀번호가 둘이 다릅니다."),
+    FOLLOW_FAIL(HttpStatus.BAD_REQUEST, "FOLLOW_FAIL", "팔로우에 실패하였습니다"),
+    UNFOLLOW_FAIL(HttpStatus.BAD_REQUEST, "UNFOLLOW_FAIL", "팔로우에 실패하였습니다"),
 
     // Comment
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT_NOT_FOUND", "댓글을 찾을 수 없습니다."),
