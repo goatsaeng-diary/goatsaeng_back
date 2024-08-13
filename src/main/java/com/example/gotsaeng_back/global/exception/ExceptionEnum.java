@@ -35,7 +35,7 @@ public enum ExceptionEnum {
     UNFOLLOW_FAIL(HttpStatus.BAD_REQUEST, "UNFOLLOW_FAIL", "팔로우에 실패하였습니다"),
 
     // Comment
-    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT_NOT_FOUND", "댓글을 찾을 수 없습니다."),
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT_NOT_FOUND", "등록된 댓글이 없습니다."),
     COMMENT_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "COMMENT_DELETE_FORBIDDEN", "댓글 삭제 권한이 없습니다."),
     COMMENT_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "COMMENT_UPDATE_FORBIDDEN", "댓글 수정 권한이 없습니다."),
 
