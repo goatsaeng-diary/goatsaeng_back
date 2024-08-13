@@ -2,6 +2,7 @@ package com.example.gotsaeng_back.domain.auth.controller;
 
 
 import static com.example.gotsaeng_back.global.exception.ExceptionEnum.DUPLICATE;
+import static com.example.gotsaeng_back.global.exception.ExceptionEnum.DUPLICATEMAIL;
 import static com.example.gotsaeng_back.global.exception.ExceptionEnum.FAIL_EMAIL_SEND;
 import static com.example.gotsaeng_back.global.exception.ExceptionEnum.NO_SEARCH_EMAIL;
 
@@ -18,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -72,8 +74,6 @@ public class UserRestController {
     @GetMapping("/check-username/{username}")
     public CustomResponse<?> userDuplicate(@PathVariable("username") String username){
         User duplicateUser = userService.findByUsername(username);
-        System.out.println(username);
-        System.out.println(duplicateUser);
         if(duplicateUser!=null){
             throw new ApiException(DUPLICATE);
         }else{
@@ -82,6 +82,16 @@ public class UserRestController {
         }
     }
 
+    @GetMapping("/check-email/{email}")
+    public CustomResponse<?> emailDuplicate(@PathVariable("email") String email){
+        User duplicateEmail = userService.findByEmail(email);
+        if(duplicateEmail.getEmail()!=null){
+            throw new ApiException(DUPLICATEMAIL);
+        }else{
+            System.out.println("사용가능");
+            return new CustomResponse<>(HttpStatus.OK,"사용 가능한 이메일 입니다.",duplicateEmail.getEmail());
+        }
+    }
     @PostMapping("/email-send/{email}")
     public CustomResponse<?> sendEmail(@PathVariable("email") String email){
         try{
