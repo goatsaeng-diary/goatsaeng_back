@@ -2,6 +2,8 @@ package com.example.gotsaeng_back.domain.auth.controller;
 
 
 import static com.example.gotsaeng_back.global.exception.ExceptionEnum.DUPLICATE;
+import static com.example.gotsaeng_back.global.exception.ExceptionEnum.FAIL_EMAIL_SEND;
+import static com.example.gotsaeng_back.global.exception.ExceptionEnum.NO_SEARCH_EMAIL;
 
 import com.example.gotsaeng_back.domain.auth.dto.LoginDto;
 import com.example.gotsaeng_back.domain.auth.dto.SignUpDto;
@@ -14,6 +16,8 @@ import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
 import com.example.gotsaeng_back.global.response.CustomResponse;
 import jakarta.servlet.http.HttpServletResponse;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -75,6 +79,26 @@ public class UserRestController {
         }else{
             System.out.println("사용가능");
             return new CustomResponse<>(HttpStatus.OK,"사용 가능한 아이디 입니다.",username);
+        }
+    }
+
+    @PostMapping("/email-send/{email}")
+    public CustomResponse<?> sendEmail(@PathVariable("email") String email){
+        try{
+            userService.sendEmail(email);
+        }catch (Exception e ){
+            throw new ApiException(FAIL_EMAIL_SEND);
+        }
+
+        return new CustomResponse<>(HttpStatus.OK,"메일발송","null");
+    }
+
+    @GetMapping("/email-verify/{email}/{code}")
+    public CustomResponse<?> verifyCode(@PathVariable("email") String email,@PathVariable("code") String code){
+        try{
+            return userService.verifyCode(email,code);
+        }catch(Exception e){
+            throw new ApiException(NO_SEARCH_EMAIL);
         }
     }
 }

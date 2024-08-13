@@ -4,6 +4,7 @@ import com.example.gotsaeng_back.domain.auth.dto.SignUpDto;
 import com.example.gotsaeng_back.domain.auth.dto.UserUpdateDto;
 import com.example.gotsaeng_back.domain.auth.entity.User;
 import com.example.gotsaeng_back.domain.auth.oauth2.dto.OAuthAttributes;
+import com.example.gotsaeng_back.global.response.CustomResponse;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
@@ -21,4 +22,7 @@ public interface UserService {
     UserUpdateDto updateUser(User user , Long userId);
     User findById(Long userId);
     User userLogin(String username , String password);
+    String sendEmail(String to) throws Exception;
+
+    CustomResponse<?> verifyCode(String email, String code);
 }
