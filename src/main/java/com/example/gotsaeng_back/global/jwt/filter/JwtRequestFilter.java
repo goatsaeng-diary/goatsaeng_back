@@ -43,7 +43,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //            return;
 //        }
 
-        System.out.println("필터탔어요");
         // 요청 헤더에서 JWT 토큰 추출
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
@@ -84,7 +83,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
             }
         }
-
         chain.doFilter(request, response);
     }
 }
