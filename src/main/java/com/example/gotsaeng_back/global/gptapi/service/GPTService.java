@@ -7,4 +7,6 @@ import reactor.core.publisher.Mono;
 public interface GPTService {
     // GPT API 호출을 처리하는 메서드
     Mono<GPTResponseDto> getGPTResponse(GPTRequestDto requestDto, String userAccessToken);
+
+    String getQuestion();
 }

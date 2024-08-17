@@ -1,8 +1,11 @@
 package com.example.gotsaeng_back.global.gptapi.service.impl;
 
+import com.example.gotsaeng_back.global.gptapi.WordRepository;
 import com.example.gotsaeng_back.global.gptapi.dto.GPTRequestDto;
 import com.example.gotsaeng_back.global.gptapi.dto.GPTResponseDto;
+import com.example.gotsaeng_back.global.gptapi.entity.Word;
 import com.example.gotsaeng_back.global.gptapi.service.GPTService;
+import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -15,6 +18,9 @@ public class GPTServiceImpl implements GPTService {
 
     @Autowired
     private WebClient webClient; // 설정된 WebClient를 주입받음
+
+    @Autowired
+    private WordRepository wordRepository;
 
     @Override
     public Mono<GPTResponseDto> getGPTResponse(GPTRequestDto requestDto, String userAccessToken) {
@@ -39,5 +45,18 @@ public class GPTServiceImpl implements GPTService {
                     Map<String, String> message = (Map<String, String>) choices.get("message");
                     return new GPTResponseDto(message.get("content"));
                 });
+    }
+
+    @Override
+    public String getQuestion() {
+        Long count = wordRepository.countWords();
+        Random random = new Random();
+        Long randomNumber = random.nextLong(count) + 1;
+        Word word = wordRepository.findById(randomNumber).orElseThrow();
+        System.out.println(word.getWordName());
+        return word.getWordName()+"From now on, your answers to my questions will be in Korean."
+                + "Could you give me an easy problem related to this word? The problem format is as follows"
+                + "Problem/Correct Answer"
+                + "We will separate the questions and answers by separating them with /. ";
     }
 }

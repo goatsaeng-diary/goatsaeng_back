@@ -63,6 +63,8 @@ dependencies {
 
     // Spring WebFlux 의존성 추가
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-json'
+    implementation 'org.apache.poi:poi-ooxml:5.3.0'
 }
 
 tasks.named('test') {
