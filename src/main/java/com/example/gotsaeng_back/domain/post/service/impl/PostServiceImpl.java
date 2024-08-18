@@ -6,6 +6,7 @@ import com.example.gotsaeng_back.domain.post.dto.post.PostCreateDTO;
 import com.example.gotsaeng_back.domain.post.dto.post.PostDetailDTO;
 import com.example.gotsaeng_back.domain.post.dto.post.PostEditDTO;
 import com.example.gotsaeng_back.domain.post.dto.post.PostListDTO;
+import com.example.gotsaeng_back.domain.post.entity.Like;
 import com.example.gotsaeng_back.domain.post.entity.Post;
 import com.example.gotsaeng_back.domain.post.repository.PostRepository;
 import com.example.gotsaeng_back.domain.post.service.PostService;
@@ -40,20 +41,25 @@ public class PostServiceImpl implements PostService {
     }
 
     @Transactional
-    public void editPost(Long postId,PostEditDTO postEditDTO) {
+    public void editPost(Long postId,List<String> filePaths,PostEditDTO postEditDTO) {
         Post post = getByPostId(postId);
-        post.builder()
-                .title(postEditDTO.getTitle())
-                .content(postEditDTO.getContent())
-                .updatedDate(LocalDateTime.now());
+        post.setTitle(postEditDTO.getTitle());
+        post.setContent(postEditDTO.getContent());
+        if (!filePaths.isEmpty()) {
+            post.setFiles(filePaths);
+        }
+        else post.setFiles(null);
+        post.setUpdatedDate(LocalDateTime.now());
+        savePost(post);
     }
 
     @Override
     @Transactional
-    public Post createPost(PostCreateDTO postCreateDTO, String token) {
+    public Post createPost(PostCreateDTO postCreateDTO,List<String> filesPaths,  String token) {
         Post post = new Post();
         post.setTitle(postCreateDTO.getTitle());
         post.setContent(postCreateDTO.getContent());
+        post.setFiles(filesPaths);
         String username = jwtUtil.getUserNameFromToken(token);
         User user = userService.findByUsername(username);
         post.setUser(user);
@@ -70,46 +76,41 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostListDTO userPost(Long userId) {
         List<Post> posts = postRepository.findAllByUser(userService.findById(userId));
-        PostListDTO postListDTO = new PostListDTO();
-        List<PostDetailDTO> postDetailDTOList = postListDTO.getPosts();
-        for (Post post : posts) {
-            PostDetailDTO postDetailDTO = PostDetailDTO.builder()
-                    .title(post.getTitle())
-                    .content(post.getContent())
-                    .nickname(post.getUser().getNickname())
-                    .build();
-            postDetailDTOList.add(postDetailDTO);
-        }
-        postListDTO.setPosts(postDetailDTOList);
-        return postListDTO;
+        return getPosts(posts);
     }
 
     @Override
     public PostDetailDTO postDetails(Long postId) {
         Post post = postRepository.findByPostId(postId);
         return PostDetailDTO.builder()
-                    .title(post.getTitle())
-                    .content(post.getContent())
-                    .nickname(post.getUser().getNickname())
-                    .build();
+                .title(post.getTitle())
+                .content(post.getContent())
+                .files(post.getFiles())
+                .nickname(post.getUser().getNickname())
+                .build();
     }
 
     @Override
     public PostListDTO allPosts() {
         List<Post> posts = postRepository.findAll();
+        return getPosts(posts);
+    }
+
+    public PostListDTO getPosts(List<Post> posts) {
         PostListDTO postListDTO = new PostListDTO();
         List<PostDetailDTO> postDetailDTOList = postListDTO.getPosts();
         for (Post post : posts) {
             PostDetailDTO postDetailDTO = PostDetailDTO.builder()
                     .title(post.getTitle())
                     .content(post.getContent())
+                    .files(post.getFiles())
                     .nickname(post.getUser().getNickname())
                     .build();
             postDetailDTOList.add(postDetailDTO);
         }
         postListDTO.setPosts(postDetailDTOList);
         return postListDTO;
-
     }
+
 
 }
