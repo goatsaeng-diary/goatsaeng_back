@@ -29,7 +29,7 @@ public class GPTServiceImpl implements GPTService {
                 .uri("/chat/completions")  // OpenAI API 엔드포인트
 //                .header("Authorization", "Bearer " + userAccessToken)  // 사용자 인증 토큰 추가
                 .bodyValue(Map.of(
-                        "model", "gpt-3.5-turbo",  // 사용할 GPT 모델
+                        "model", "gpt-4o",  // 사용할 GPT 모델
                         "messages", new Object[]{ // 대화의 내용을 전달
                                 Map.of(
                                         "role", "user",
@@ -54,9 +54,7 @@ public class GPTServiceImpl implements GPTService {
         Long randomNumber = random.nextLong(count) + 1;
         Word word = wordRepository.findById(randomNumber).orElseThrow();
         System.out.println(word.getWordName());
-        return word.getWordName()+"From now on, your answers to my questions will be in Korean."
-                + "Could you give me an easy problem related to this word? The problem format is as follows"
-                + "Problem/Correct Answer"
-                + "We will separate the questions and answers by separating them with /. ";
+        return word.getWordName()+"이라는 단어로 문제를 내줘. 단어의 정의가 들어가 있어야되고 , 사용자가 "+word.getWordName()+" 이라는 단어를 말했을때 정답이 되도록 해야해. 다음은 너의 대답에 대한 포멧이야. 다른말 하지말고 내가 말해준 단어, 너가 말해야되는 포멧에 맞춰서 대답해. 정신차리고 대답해\n"
+                + "문제 : (여기에 문제를 내줘)";
     }
 }
