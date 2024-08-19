@@ -13,11 +13,11 @@ public interface PostService {
 
     Post getByPostId(Long postId);
 
-    void editPost(Long postId, PostEditDTO postEditDTO);
+    void editPost(Long postId, List<String> filePaths, PostEditDTO postEditDTO);
 
     void deletePost(Long postId);
 
-    Post createPost(PostCreateDTO postCreateDTO, String token);
+    Post createPost(PostCreateDTO postCreateDTO,List<String> filePaths, String token);
 
     PostListDTO userPost(Long userId);
 

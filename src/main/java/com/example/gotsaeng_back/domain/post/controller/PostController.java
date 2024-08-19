@@ -3,15 +3,18 @@ package com.example.gotsaeng_back.domain.post.controller;
 import com.example.gotsaeng_back.domain.post.dto.post.PostDetailDTO;
 import com.example.gotsaeng_back.domain.post.dto.post.PostEditDTO;
 import com.example.gotsaeng_back.domain.post.dto.post.PostListDTO;
+import com.example.gotsaeng_back.domain.post.service.LikeService;
 import com.example.gotsaeng_back.domain.post.service.PostService;
+import com.example.gotsaeng_back.global.file.FileStorageService;
 import com.example.gotsaeng_back.global.response.CustomResponse;
 import com.example.gotsaeng_back.domain.post.dto.post.PostCreateDTO;
 import com.example.gotsaeng_back.domain.post.entity.Post;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,6 +23,8 @@ import java.util.List;
 @RequestMapping("/api/post")
 public class PostController {
     private final PostService postService;
+    private final FileStorageService fileStorageService;
+    private final LikeService likeService;
 
     /**
      * 게시물 생성
@@ -28,8 +33,9 @@ public class PostController {
      * @return 생성한 게시물 Id
      */
     @PostMapping("/create")
-    public CustomResponse<Long> createPost(@RequestBody PostCreateDTO postCreateDTO, @RequestHeader("Authorization") String token) {
-        Post post = postService.createPost(postCreateDTO, token);
+    public CustomResponse<Long> createPost(@RequestPart(name = "postCreateDTO") PostCreateDTO postCreateDTO, @RequestHeader("Authorization") String token, @RequestPart(name = "files") List<MultipartFile> files) {
+        List<String> filePaths = fileStorageService.storeFiles(files, "files");
+        Post post = postService.createPost(postCreateDTO, filePaths, token);
         return new CustomResponse<>(HttpStatus.OK, "게시물 작성 성공", post.getPostId());
     }
 
@@ -40,8 +46,8 @@ public class PostController {
      * @return 수정할 게시물 Id
      */
     @GetMapping("/editpage/{postId}")
-    public CustomResponse<Long> editPage(@PathVariable Long postId) {
-        return new CustomResponse<>(HttpStatus.OK, "원래 게시물 불러오기", postService.getByPostId(postId).getPostId());
+    public CustomResponse<Post> editPage(@PathVariable Long postId) {
+        return new CustomResponse<>(HttpStatus.OK, "원래 게시물 불러오기", postService.getByPostId(postId));
     }
 
     /**
@@ -52,9 +58,10 @@ public class PostController {
      * @return 수정한 게시물 Id
      */
     @PostMapping("/edit/{postId}")
-    public CustomResponse<Void> editPost(@PathVariable Long postId, @RequestBody PostEditDTO postEditDTO) {
-        postService.editPost(postId, postEditDTO);
-        return new CustomResponse<>(HttpStatus.OK, String.format("%d번 게시물 삭제 폼 요청", postId), null);
+    public CustomResponse<Void> editPost(@PathVariable Long postId, @RequestBody PostEditDTO postEditDTO, @RequestParam("lists") List<MultipartFile> files) {
+        List<String> filePaths = fileStorageService.storeFiles(files, "files");
+        postService.editPost(postId, filePaths, postEditDTO);
+        return new CustomResponse<>(HttpStatus.OK, String.format("%d번 게시물 수정", postId), null);
     }
 
     /**
@@ -99,5 +106,21 @@ public class PostController {
     public CustomResponse<PostListDTO> allPosts() {
         PostListDTO postListDTO = postService.allPosts();
         return new CustomResponse<>(HttpStatus.OK, "모든 게시물 로딩 성공", postListDTO);
+    }
+
+    /**
+     *
+     * @param postId    좋아요 누를 게시물 Id
+     * @param like      좋아요 여부
+     * @return
+     */
+    @PostMapping("/like/{postId}")
+    public CustomResponse<Void> like(@PathVariable Long postId,@RequestBody boolean like,@RequestHeader("Authorization") String token) {
+        if (like) {
+            likeService.addLike(postId,token);
+        }
+        else likeService.removeLike(postId,token);
+
+        return new CustomResponse<>(HttpStatus.OK, "좋아요 처리 완료", null);
     }
 }

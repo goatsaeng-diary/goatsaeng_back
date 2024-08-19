@@ -23,6 +23,9 @@ public class Post {
     @Column(nullable = false)
     private String title;
 
+    @ElementCollection
+    private List<String> files;
+
     @Column(nullable = false)
     private String content;
 
@@ -41,4 +44,7 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Comment> comments;
+
+    @OneToMany(mappedBy = "post",cascade = CascadeType.ALL)
+    private List<Like> likes;
 }
