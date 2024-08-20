@@ -12,7 +12,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomRecordType {
-
     @Id
     @Column(name = "custom_record_type_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,8 +24,9 @@ public class CustomRecordType {
     @Column(nullable = false, name = "type_name")
     private String typeName;
 
+    @Column(nullable = false)
     private String unit;
 
     @Column(columnDefinition = "JSON")
-    private String fields;
+    private String field;
 }

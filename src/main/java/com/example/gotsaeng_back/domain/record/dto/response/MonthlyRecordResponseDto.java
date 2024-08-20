@@ -2,6 +2,7 @@ package com.example.gotsaeng_back.domain.record.dto.response;
 
 import lombok.*;
 
+import java.time.YearMonth;
 import java.time.LocalDate;
 
 @Getter
@@ -10,18 +11,17 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MonthlyRecordResponseDto {
-    private Long recordId;
     private Long recordTypeId;
-    private LocalDate date;
-    private String value;
+    private String month;
+    private int participationCount;
+    private double averageValue;
 
-
-    public static MonthlyRecordResponseDto fromEntity(Record record) {
-        return RecordResponseDto.builder()
-                .recordId(record.getRecordId())
-                .recordTypeId(record.getRecordType().getRecordTypeId())
-                .date(record.getDate())
-                .value(record.getValue())
+    // 월별 통계 정보를 생성하는 메서드
+    public static MonthlyRecordResponseDto fromMonthlySummary(YearMonth yearMonth, int participationCount, double averageValue) {
+        return MonthlyRecordResponseDto.builder()
+                .month(yearMonth.toString() + "-01")  // "YYYY-MM-01" 형식으로 문자열 반환
+                .participationCount(participationCount)
+                .averageValue(averageValue)
                 .build();
     }
 }

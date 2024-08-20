@@ -58,7 +58,7 @@ public class RecordServiceImpl implements RecordService {
             Record record = Record.builder()
                     .user(user)
                     .recordType(recordType)
-                    .date(dto.getDate())
+                    .date(LocalDate.now())
                     .value(dto.getValue())
                     .build();
 
@@ -117,14 +117,15 @@ public class RecordServiceImpl implements RecordService {
     //단일 조회 - username
     @Override
     @Transactional(readOnly = true)
-    public Record findByRecordUser(String token) {
+    public List<Record> findByRecordUser(String token) {
         Long userId = jwtUtil.getUserIdFromToken(token);
         User user = userService.findById(userId);
 
         if (user == null) {
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
-        return recordRepository.findByUser(user, LocalDate.now());}
+        return recordRepository.findByUserAndDate(user, LocalDate.now());
+    }
 
     //전체 조회
     @Transactional(readOnly = true)
@@ -160,7 +161,7 @@ public class RecordServiceImpl implements RecordService {
     //전체 기록을 월별로 조회 (평균치 계산)
     @Override
     @Transactional(readOnly = true)
-    public Page<MonthlyRecordResponseDto> getRecordsByMonth(String token, Pageable pageable) {
+    public Page<MonthlyRecordResponseDto> getRecordsByMonth(String token, Long recordTypeId, Pageable pageable) {
 
         Long userId = jwtUtil.getUserIdFromToken(token);
         User user = userService.findById(userId);
@@ -171,14 +172,19 @@ public class RecordServiceImpl implements RecordService {
 
         List<Record> recordList = getAllRecordByUser(user);
 
-        //기록이 있는 월 수집
-        Map<LocalDate, List<Record>> recordsByMonth = recordList.stream()
+        // 주어진 recordTypeId로 필터링
+        List<Record> filteredRecords = recordList.stream()
+                .filter(record -> record.getRecordType().getRecordTypeId().equals(recordTypeId))
+                .collect(Collectors.toList());
+
+        // 기록을 월별로 그룹화
+        Map<LocalDate, List<Record>> recordsByMonth = filteredRecords.stream()
                 .collect(Collectors.groupingBy(record -> LocalDate.of(record.getDate().getYear(), record.getDate().getMonth(), 1)));
 
         List<MonthlyRecordResponseDto> summary = recordsByMonth.entrySet().stream()
-                .map(entry -> {
-                    LocalDate month = entry.getKey();
-                    List<Record> monthlyRecords = entry.getValue();
+                .map(monthEntry -> {
+                    LocalDate month = monthEntry.getKey();
+                    List<Record> monthlyRecords = monthEntry.getValue();
 
                     // 참여 횟수
                     long participationCount = monthlyRecords.size();
@@ -190,7 +196,8 @@ public class RecordServiceImpl implements RecordService {
                             .orElse(0.0);
 
                     return MonthlyRecordResponseDto.builder()
-                            .month(month)
+                            .recordTypeId(recordTypeId)  // Record Type ID 추가
+                            .month(month.toString() + "-01")
                             .participationCount((int) participationCount)
                             .averageValue(averageValue)
                             .build();

@@ -12,6 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/record")
@@ -57,9 +60,11 @@ public class RecordController {
 
     //단일 조회 -- user정보를 통해 오늘 기록
     @GetMapping("/default/today")
-    public CustomResponse<RecordResponseDto> getRecordByDate(@RequestHeader("Authorization") String token) {
-        Record record = recordService.findByRecordUser(token);
-        RecordResponseDto responseDto = RecordResponseDto.fromEntity(record);
+    public CustomResponse<List<RecordResponseDto>> getRecordByDate(@RequestHeader("Authorization") String token) {
+        List<Record> recordList  = recordService.findByRecordUser(token);
+        List<RecordResponseDto> responseDto = recordList.stream()
+                .map(RecordResponseDto::fromEntity)
+                .collect(Collectors.toList());
         return new CustomResponse<>(HttpStatus.OK, "기록을 조회했습니다.", responseDto);
     }
 
@@ -73,11 +78,12 @@ public class RecordController {
     }
 
     //전체 기록을 월별로 조회 (평균치 계산)
-    @GetMapping("/default/prev-average-month")
+    @GetMapping("/default/prev-average-month/{recordTypeId}")
     public CustomResponse<Page<MonthlyRecordResponseDto>> getRecordsByMonth(
+            @PathVariable("recordTypeId") Long recordTypeId,
             @RequestHeader("Authorization") String token,
             Pageable pageable) {
-        Page<MonthlyRecordResponseDto> monthlyRecordList = recordService.getRecordsByMonth(token, pageable);
+        Page<MonthlyRecordResponseDto> monthlyRecordList = recordService.getRecordsByMonth(token, recordTypeId, pageable);
         return new CustomResponse<>(HttpStatus.OK, "월별 기록을 조회했습니다.", monthlyRecordList);
     }
 }

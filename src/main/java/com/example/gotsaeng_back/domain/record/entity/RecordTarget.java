@@ -15,8 +15,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class RecordTarget {
     @Id
+    @Column(name = "target_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long target_id;
+    private Long targetId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

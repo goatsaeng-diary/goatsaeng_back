@@ -2,13 +2,17 @@ package com.example.gotsaeng_back.domain.record.entity;
 
 import com.example.gotsaeng_back.domain.auth.entity.User;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "Records")
-@Data
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Record {
     @Id
     @Column(name = "record_id", nullable = false)
