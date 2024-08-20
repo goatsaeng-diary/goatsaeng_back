@@ -5,13 +5,12 @@ import com.example.gotsaeng_back.domain.post.dto.post.PostEditDTO;
 import com.example.gotsaeng_back.domain.post.dto.post.PostListDTO;
 import com.example.gotsaeng_back.domain.post.service.LikeService;
 import com.example.gotsaeng_back.domain.post.service.PostService;
-import com.example.gotsaeng_back.global.file.FileStorageService;
+import com.example.gotsaeng_back.global.file.S3StorageService;
 import com.example.gotsaeng_back.global.response.CustomResponse;
 import com.example.gotsaeng_back.domain.post.dto.post.PostCreateDTO;
 import com.example.gotsaeng_back.domain.post.entity.Post;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,7 +22,6 @@ import java.util.List;
 @RequestMapping("/api/post")
 public class PostController {
     private final PostService postService;
-    private final FileStorageService fileStorageService;
     private final LikeService likeService;
 
     /**
@@ -34,8 +32,7 @@ public class PostController {
      */
     @PostMapping("/create")
     public CustomResponse<Long> createPost(@RequestPart(name = "postCreateDTO") PostCreateDTO postCreateDTO, @RequestHeader("Authorization") String token, @RequestPart(name = "files") List<MultipartFile> files) {
-        List<String> filePaths = fileStorageService.storeFiles(files, "files");
-        Post post = postService.createPost(postCreateDTO, filePaths, token);
+        Post post = postService.createPost(postCreateDTO, files, token);
         return new CustomResponse<>(HttpStatus.OK, "게시물 작성 성공", post.getPostId());
     }
 
@@ -59,8 +56,7 @@ public class PostController {
      */
     @PostMapping("/edit/{postId}")
     public CustomResponse<Void> editPost(@PathVariable Long postId, @RequestBody PostEditDTO postEditDTO, @RequestParam("lists") List<MultipartFile> files) {
-        List<String> filePaths = fileStorageService.storeFiles(files, "files");
-        postService.editPost(postId, filePaths, postEditDTO);
+        postService.editPost(postId, files, postEditDTO);
         return new CustomResponse<>(HttpStatus.OK, String.format("%d번 게시물 수정", postId), null);
     }
 
