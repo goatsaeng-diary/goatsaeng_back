@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FollowDto {
-    String name;
+    String nickname;
     String userImage;
     Long userId;
 }
