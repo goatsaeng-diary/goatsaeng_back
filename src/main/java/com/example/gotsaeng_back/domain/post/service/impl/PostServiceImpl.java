@@ -10,12 +10,14 @@ import com.example.gotsaeng_back.domain.post.entity.Like;
 import com.example.gotsaeng_back.domain.post.entity.Post;
 import com.example.gotsaeng_back.domain.post.repository.PostRepository;
 import com.example.gotsaeng_back.domain.post.service.PostService;
+import com.example.gotsaeng_back.global.file.S3StorageService;
 import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final JwtUtil jwtUtil;
     private final UserService userService;
+    private final S3StorageService s3StorageService;
 
     @Transactional
     @Override
@@ -41,12 +44,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Transactional
-    public void editPost(Long postId,List<String> filePaths,PostEditDTO postEditDTO) {
+    public void editPost(Long postId,List<MultipartFile> files,PostEditDTO postEditDTO) {
         Post post = getByPostId(postId);
         post.setTitle(postEditDTO.getTitle());
         post.setContent(postEditDTO.getContent());
-        if (!filePaths.isEmpty()) {
-            post.setFiles(filePaths);
+        if (!files.isEmpty()) {
+            List<String> list = files.stream()
+                    .map(s3StorageService::uploadFile)
+                    .toList();
+            post.setFiles(list);
         }
         else post.setFiles(null);
         post.setUpdatedDate(LocalDateTime.now());
@@ -55,11 +61,14 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Post createPost(PostCreateDTO postCreateDTO,List<String> filesPaths,  String token) {
+    public Post createPost(PostCreateDTO postCreateDTO, List<MultipartFile> files, String token) {
         Post post = new Post();
         post.setTitle(postCreateDTO.getTitle());
         post.setContent(postCreateDTO.getContent());
-        post.setFiles(filesPaths);
+        List<String> list = files.stream()
+                .map(s3StorageService::uploadFile)
+                .toList();
+        post.setFiles(list);
         String username = jwtUtil.getUserNameFromToken(token);
         User user = userService.findByUsername(username);
         post.setUser(user);
