@@ -13,13 +13,13 @@ public class StorageConfig {
     @Value("${storage.local.directory}")
     private String localPath;
 
-    @Value("${aws.access_key_id}")
+    @Value("${cloud.aws.credentials.access-key}")
     private String accessKey;
 
-    @Value("${aws.secret_access_key}")
+    @Value("${cloud.aws.credentials.secret-key}")
     private String secretKey;
 
-    @Value("${s3.bucket}")
+    @Value("${cloud.aws.s3.bucketName}")
     private String bucketName;
 
     @Bean(name = "localStorageService")
@@ -28,9 +28,4 @@ public class StorageConfig {
         return new LocalStorageService(localPath);
     }
 
-    @Bean(name = "s3StorageService")
-    @Profile("prod")
-    public FileStorageService s3StorageService() {
-        return new S3StorageService(accessKey,secretKey,bucketName);
-    }
 }

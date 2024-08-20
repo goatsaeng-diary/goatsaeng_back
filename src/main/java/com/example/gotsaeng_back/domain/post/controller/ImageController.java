@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @RestController
-public class ImageController {
+public class  ImageController {
     @Value("${storage.local.directory}")
     private String dir;
 

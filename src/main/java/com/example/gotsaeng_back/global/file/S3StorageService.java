@@ -6,9 +6,12 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.gotsaeng_back.global.exception.ApiException;
 import com.example.gotsaeng_back.global.exception.ExceptionEnum;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,59 +21,59 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+
+@RequiredArgsConstructor
+@Service
+public class S3StorageService {
+
+    private final S3Client s3Client; //AWS에서 지원해주는 인터페이스.
+
+    @Value("${cloud.aws.s3.bucketName}")
+    private String bucketName;
 
 
-public class S3StorageService implements FileStorageService {
-
-    private final AmazonS3 s3client;
-    private final String bucketName;
-
-    public S3StorageService(@Value("${aws.access_key_id}") String accessKey,
-                            @Value("${aws.secret_access_key}") String secretKey,
-                            @Value("${s3.bucket}") String bucketName) {
-        this.bucketName = bucketName;
-        BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
-        this.s3client = AmazonS3ClientBuilder.standard()
-                // 지역 추가
-                .withRegion("")
-                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .build();
-    }
-
-    @Override
-    public String storeFile(MultipartFile file, String directory) throws IOException {
-        File tempFile = convertMultiPartToFile(file);
-        String fileName = directory + "/" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
+    public String uploadFile(MultipartFile file) {
         try {
-            s3client.putObject(new PutObjectRequest(bucketName, fileName, tempFile)
-                    .withCannedAcl(CannedAccessControlList.PublicRead));
-            return s3client.getUrl(bucketName, fileName).toString();
-        } catch (AmazonServiceException e) {
-            throw new ApiException(ExceptionEnum.INTERNAL_SERVER_ERROR);
-        } finally {
-            tempFile.delete();
+            //파일저장방식 변경
+            String uuid = UUID.randomUUID().toString(); //uuid자동으로발급
+            String datePath = LocalDate.now().toString().replace("-", "/");//년월일 생성
+            String key = datePath + "/" + uuid;//년월일+/uuid
+
+            s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(key)
+                            .build(),
+                    RequestBody.fromBytes(file.getBytes())
+            );
+            return key;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public List<String> storeFiles(List<MultipartFile> files, String directory) {
-        return files.stream()
-                .map(file -> {
-                    try {
-                        return storeFile(file, directory);
-                    } catch (IOException e) {
-                        // 예외 처리
-                        throw new RuntimeException("Failed to store file in S3", e);
-                    }
-                })
-                .collect(Collectors.toList());
+
+    public InputStream downloadFile(String key) {
+        return s3Client.getObject(GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build());
     }
 
-    private File convertMultiPartToFile(MultipartFile file) throws IOException {
-        File convFile = new File(file.getOriginalFilename());
-        try (FileOutputStream fos = new FileOutputStream(convFile)) {
-            fos.write(file.getBytes());
+
+    public void deleteFile(String file) {
+        try {
+            s3Client.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(bucketName)  // 버킷 이름을 지정합니다.
+                    .key(file)
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete file from S3", e);
         }
-        return convFile;
     }
 }
