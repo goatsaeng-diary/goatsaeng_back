@@ -8,7 +8,9 @@ import com.example.gotsaeng_back.domain.post.dto.post.PostEditDTO;
 import com.example.gotsaeng_back.domain.post.dto.post.PostListDTO;
 import com.example.gotsaeng_back.domain.post.entity.Like;
 import com.example.gotsaeng_back.domain.post.entity.Post;
+import com.example.gotsaeng_back.domain.post.repository.LikeRepository;
 import com.example.gotsaeng_back.domain.post.repository.PostRepository;
+import com.example.gotsaeng_back.domain.post.service.LikeService;
 import com.example.gotsaeng_back.domain.post.service.PostService;
 import com.example.gotsaeng_back.global.file.S3StorageService;
 import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
@@ -31,6 +33,7 @@ public class PostServiceImpl implements PostService {
     private final JwtUtil jwtUtil;
     private final UserService userService;
     private final S3StorageService s3StorageService;
+    private final LikeService likeService;
 
     @Transactional
     @Override
@@ -89,13 +92,19 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDetailDTO postDetails(Long postId) {
+    public PostDetailDTO postDetails(Long postId,String token) {
         Post post = postRepository.findByPostId(postId);
+        boolean like = likeService.isLikePostByUser(postId, token);
         return PostDetailDTO.builder()
                 .title(post.getTitle())
                 .content(post.getContent())
                 .files(post.getFiles())
                 .nickname(post.getUser().getNickname())
+                .userImage(post.getUser().getUserImage())
+                .createDate(post.getCreatedDate())
+                .like(like)
+                .commentCount((long) post.getComments().size())
+                .likeCount(likeService.getLikes(postId))
                 .build();
     }
 
