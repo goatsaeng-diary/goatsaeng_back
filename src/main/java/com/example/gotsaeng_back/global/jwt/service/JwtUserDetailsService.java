@@ -36,7 +36,9 @@ public class JwtUserDetailsService implements UserDetailsService {
 
         // 비밀번호가 null인지 확인
         if (user.getPassword() == null || user.getPassword().isEmpty()) {
-            throw new IllegalArgumentException("비밀번호가 설정되어 있지 않습니다.");
+            if(user.getProvider()!=null){
+                user.setPassword("1234");
+            }
         }
 
         org.springframework.security.core.userdetails.User.UserBuilder userBuilder =

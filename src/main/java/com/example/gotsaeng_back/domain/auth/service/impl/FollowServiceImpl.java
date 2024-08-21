@@ -60,8 +60,8 @@ public class FollowServiceImpl implements FollowService {
             for(Follow follow : followers){
                 User followerUser = follow.getFollowing();
                 FollowDto followDto = new FollowDto();
-                followDto.setName(followerUser.getName());
-//            followDto.setUserImage(followerUser.getUserImage());
+                followDto.setNickname(followerUser.getNickname());
+                followDto.setUserImage(followerUser.getUserImage());
                 followDto.setUserId(followerUser.getUserId());
                 followDtos.add(followDto);
             }
@@ -80,8 +80,8 @@ public class FollowServiceImpl implements FollowService {
             for(Follow follow : followings){
                 User followerUser = follow.getFollower();
                 FollowDto followDto = new FollowDto();
-                followDto.setName(followerUser.getName());
-//            followDto.setUserImage(followerUser.getUserImage());
+                followDto.setNickname(followerUser.getNickname());
+                followDto.setUserImage(followerUser.getUserImage());
                 followDto.setUserId(followerUser.getUserId());
                 followingDtos.add(followDto);
             }

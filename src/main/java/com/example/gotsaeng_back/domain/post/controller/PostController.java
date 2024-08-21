@@ -1,17 +1,14 @@
 package com.example.gotsaeng_back.domain.post.controller;
 
-import com.example.gotsaeng_back.domain.post.dto.post.PostDetailDTO;
-import com.example.gotsaeng_back.domain.post.dto.post.PostEditDTO;
-import com.example.gotsaeng_back.domain.post.dto.post.PostListDTO;
+import com.example.gotsaeng_back.domain.post.dto.post.*;
 import com.example.gotsaeng_back.domain.post.service.LikeService;
 import com.example.gotsaeng_back.domain.post.service.PostService;
-import com.example.gotsaeng_back.global.file.FileStorageService;
+import com.example.gotsaeng_back.global.file.S3StorageService;
+import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
 import com.example.gotsaeng_back.global.response.CustomResponse;
-import com.example.gotsaeng_back.domain.post.dto.post.PostCreateDTO;
 import com.example.gotsaeng_back.domain.post.entity.Post;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,8 +20,8 @@ import java.util.List;
 @RequestMapping("/api/post")
 public class PostController {
     private final PostService postService;
-    private final FileStorageService fileStorageService;
     private final LikeService likeService;
+    private final JwtUtil jwtUtil;
 
     /**
      * 게시물 생성
@@ -34,20 +31,8 @@ public class PostController {
      */
     @PostMapping("/create")
     public CustomResponse<Long> createPost(@RequestPart(name = "postCreateDTO") PostCreateDTO postCreateDTO, @RequestHeader("Authorization") String token, @RequestPart(name = "files") List<MultipartFile> files) {
-        List<String> filePaths = fileStorageService.storeFiles(files, "files");
-        Post post = postService.createPost(postCreateDTO, filePaths, token);
+        Post post = postService.createPost(postCreateDTO, files, token);
         return new CustomResponse<>(HttpStatus.OK, "게시물 작성 성공", post.getPostId());
-    }
-
-    /**
-     * 게시물 수정 페이지 이동
-     *
-     * @param postId 수정할 게시물 Id
-     * @return 수정할 게시물 Id
-     */
-    @GetMapping("/editpage/{postId}")
-    public CustomResponse<Post> editPage(@PathVariable Long postId) {
-        return new CustomResponse<>(HttpStatus.OK, "원래 게시물 불러오기", postService.getByPostId(postId));
     }
 
     /**
@@ -59,8 +44,7 @@ public class PostController {
      */
     @PostMapping("/edit/{postId}")
     public CustomResponse<Void> editPost(@PathVariable Long postId, @RequestBody PostEditDTO postEditDTO, @RequestParam("lists") List<MultipartFile> files) {
-        List<String> filePaths = fileStorageService.storeFiles(files, "files");
-        postService.editPost(postId, filePaths, postEditDTO);
+        postService.editPost(postId, files, postEditDTO);
         return new CustomResponse<>(HttpStatus.OK, String.format("%d번 게시물 수정", postId), null);
     }
 
@@ -89,12 +73,14 @@ public class PostController {
 
     /**
      * 특정 게시물 보기
-     * @param postId    해당 게시물 Id
-     * @return  해당 게시물 상세정보
+     *
+     * @param postId 해당 게시물 Id
+     * @return 해당 게시물 상세정보
      */
     @GetMapping("/view/{postId}")
-    public CustomResponse<PostDetailDTO> postDetails(@PathVariable Long postId) {
-        PostDetailDTO postDetailDTO = postService.postDetails(postId);
+    public CustomResponse<PostDetailDTO> postDetails(@PathVariable Long postId, @RequestHeader("Authorization") String token) {
+        Post post = postService.getByPostId(postId);
+        PostDetailDTO postDetailDTO = postService.postDetails(post, token);
         return new CustomResponse<>(HttpStatus.OK, String.format("%d번 게시물 로딩 완료", postId), postDetailDTO);
     }
 
@@ -116,11 +102,23 @@ public class PostController {
      */
     @PostMapping("/like/{postId}")
     public CustomResponse<Void> like(@PathVariable Long postId,@RequestBody boolean like,@RequestHeader("Authorization") String token) {
+        Post post = postService.getByPostId(postId);
         if (like) {
-            likeService.addLike(postId,token);
+            likeService.addLike(post,token);
         }
-        else likeService.removeLike(postId,token);
+        else likeService.removeLike(post,token);
 
         return new CustomResponse<>(HttpStatus.OK, "좋아요 처리 완료", null);
+    }
+
+    @GetMapping("/like/list/{postId}")
+    public CustomResponse<List<LikeUserDTO>> likeList(@PathVariable Long postId) {
+        Post post = postService.getByPostId(postId);
+        return new CustomResponse<>(HttpStatus.OK,String.format("%d번 게시물 좋아요 리스트",post.getPostId()),likeService.getLikeUsers(post));
+    }
+
+    @GetMapping("/like/list")
+    public CustomResponse<List<Long>> likePostList(@RequestHeader("Authorization") String token) {
+        return new CustomResponse<>(HttpStatus.OK, String.format("%d번 유저 좋아요 리스트", jwtUtil.getUserIdFromToken(token)), likeService.getLikePosts(token));
     }
 }

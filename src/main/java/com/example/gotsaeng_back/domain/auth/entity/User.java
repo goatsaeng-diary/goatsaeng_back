@@ -37,6 +37,9 @@ public class User {
     @Column(name = "nickname")
     private String nickname;
 
+    @Column(name="user_image")
+    private String userImage;
+
     @Column(name = "registration_date", nullable = false)
     private LocalDateTime registrationDate = LocalDateTime.now();
 

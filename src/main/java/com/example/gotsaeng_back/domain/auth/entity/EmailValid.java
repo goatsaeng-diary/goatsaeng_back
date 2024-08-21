@@ -19,3 +19,4 @@ public class EmailValid {
 
     private String code;
 }
+
