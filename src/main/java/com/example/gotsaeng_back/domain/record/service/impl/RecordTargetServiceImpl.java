@@ -107,7 +107,7 @@ public class RecordTargetServiceImpl implements RecordTargetService {
     @Transactional(readOnly = true)
     public List<RecordTarget> findAllDefaultTargets(Long recordTypeId, String token) {
         Long userId = jwtUtil.getUserIdFromToken(token);
-        return recordTargetRepository.findAllByUserIdAndRecordTypeId(userId, recordTypeId);
+        return recordTargetRepository.findAllByUserUserIdAndRecordTypeRecordTypeId(userId, recordTypeId);
     }
 
     // 전체 조회 - 커스텀 기록 타입
@@ -115,6 +115,6 @@ public class RecordTargetServiceImpl implements RecordTargetService {
     @Transactional(readOnly = true)
     public List<RecordTarget> findAllCustomTargets(Long customRecordTypeId, String token) {
         Long userId = jwtUtil.getUserIdFromToken(token);
-        return recordTargetRepository.findAllByUserIdAndCustomRecordTypeId(userId, customRecordTypeId);
+        return recordTargetRepository.findAllByUserUserIdAndCustomRecordTypeCustomRecordTypeId(userId, customRecordTypeId);
     }
 }
