@@ -1,6 +1,8 @@
 package com.example.gotsaeng_back.domain.auth.service.impl;
 
 import static com.example.gotsaeng_back.global.exception.ExceptionEnum.ACCESS_DENIED_EXCEPTION;
+import static com.example.gotsaeng_back.global.exception.ExceptionEnum.FAIL_EMAIL_SEND;
+import static com.example.gotsaeng_back.global.exception.ExceptionEnum.ID_PASSWORD_FAIL;
 import static com.example.gotsaeng_back.global.exception.ExceptionEnum.INTERNAL_SERVER_ERROR;
 
 import com.example.gotsaeng_back.domain.auth.dto.SignUpDto;
@@ -201,7 +203,7 @@ public class UserServiceImpl implements UserService {
             throw new ApiException(ACCESS_DENIED_EXCEPTION);
         }
         if(!passwordEncoder.matches(password, user.getPassword())){
-            throw new ApiException(ACCESS_DENIED_EXCEPTION);
+            throw new ApiException(ID_PASSWORD_FAIL);
         }
         return user;
     }
@@ -217,7 +219,7 @@ public class UserServiceImpl implements UserService {
             emailService.saveEmailAndCode(to,ePw);
         }catch(MailException es){
             es.printStackTrace();
-            throw new IllegalArgumentException();
+            throw new ApiException(FAIL_EMAIL_SEND);
         }
         return ePw;
     }

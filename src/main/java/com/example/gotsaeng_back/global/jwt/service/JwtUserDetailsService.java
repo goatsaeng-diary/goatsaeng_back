@@ -34,8 +34,16 @@ public class JwtUserDetailsService implements UserDetailsService {
         // role이 null인지 확인하고 기본값 또는 예외 처리
         String role = user.getRole() != null ? String.valueOf(user.getRole()) : "USER"; // 기본값 설정
 
+        // 비밀번호가 null인지 확인
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            if(user.getProvider()!=null){
+                user.setPassword("1234");
+            }
+        }
+
         org.springframework.security.core.userdetails.User.UserBuilder userBuilder =
                 org.springframework.security.core.userdetails.User.withUsername(username)
+                        .password(user.getPassword()) // 비밀번호 설정
                         .roles(role); // 역할 설정
 
         return userBuilder.build();
