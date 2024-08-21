@@ -79,7 +79,8 @@ public class PostController {
      */
     @GetMapping("/view/{postId}")
     public CustomResponse<PostDetailDTO> postDetails(@PathVariable Long postId, @RequestHeader("Authorization") String token) {
-        PostDetailDTO postDetailDTO = postService.postDetails(postId, token);
+        Post post = postService.getByPostId(postId);
+        PostDetailDTO postDetailDTO = postService.postDetails(post, token);
         return new CustomResponse<>(HttpStatus.OK, String.format("%d번 게시물 로딩 완료", postId), postDetailDTO);
     }
 
@@ -101,17 +102,19 @@ public class PostController {
      */
     @PostMapping("/like/{postId}")
     public CustomResponse<Void> like(@PathVariable Long postId,@RequestBody boolean like,@RequestHeader("Authorization") String token) {
+        Post post = postService.getByPostId(postId);
         if (like) {
-            likeService.addLike(postId,token);
+            likeService.addLike(post,token);
         }
-        else likeService.removeLike(postId,token);
+        else likeService.removeLike(post,token);
 
         return new CustomResponse<>(HttpStatus.OK, "좋아요 처리 완료", null);
     }
 
     @GetMapping("/like/list/{postId}")
     public CustomResponse<List<LikeUserDTO>> likeList(@PathVariable Long postId) {
-        return new CustomResponse<>(HttpStatus.OK,String.format("%d번 게시물 좋아요 리스트",postId),likeService.getLikeUsers(postId));
+        Post post = postService.getByPostId(postId);
+        return new CustomResponse<>(HttpStatus.OK,String.format("%d번 게시물 좋아요 리스트",post.getPostId()),likeService.getLikeUsers(post));
     }
 
     @GetMapping("/like/list")

@@ -92,9 +92,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDetailDTO postDetails(Long postId,String token) {
-        Post post = postRepository.findByPostId(postId);
-        boolean like = likeService.isLikePostByUser(postId, token);
+    public PostDetailDTO postDetails(Post post,String token) {
+        boolean like = likeService.isLikePostByUser(post, token);
         return PostDetailDTO.builder()
                 .title(post.getTitle())
                 .content(post.getContent())
@@ -104,7 +103,7 @@ public class PostServiceImpl implements PostService {
                 .createDate(post.getCreatedDate())
                 .like(like)
                 .commentCount((long) post.getComments().size())
-                .likeCount(likeService.getLikes(postId))
+                .likeCount(likeService.getLikes(post))
                 .build();
     }
 

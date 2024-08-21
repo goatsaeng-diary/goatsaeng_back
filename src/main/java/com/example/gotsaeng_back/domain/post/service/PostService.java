@@ -22,7 +22,7 @@ public interface PostService {
 
     PostListDTO userPost(Long userId);
 
-    PostDetailDTO postDetails(Long postId,String token);
+    PostDetailDTO postDetails(Post post,String token);
 
     PostListDTO allPosts();
 }
