@@ -10,5 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface FollowRepository extends JpaRepository<Follow,Long> {
     List<Follow> findAllByFollowing(User user);
     List<Follow> findAllByFollower(User user);
+    Follow findByFollowerAndFollowing(User follower , User following);
 
 }

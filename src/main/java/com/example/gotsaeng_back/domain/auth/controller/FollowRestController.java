@@ -1,7 +1,11 @@
 package com.example.gotsaeng_back.domain.auth.controller;
 
+import static com.example.gotsaeng_back.global.exception.ExceptionEnum.FOLLOW_FAIL;
+import static com.example.gotsaeng_back.global.exception.ExceptionEnum.UNFOLLOW_FAIL;
+
 import com.example.gotsaeng_back.domain.auth.dto.FollowDto;
 import com.example.gotsaeng_back.domain.auth.service.FollowService;
+import com.example.gotsaeng_back.global.exception.ApiException;
 import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
 import com.example.gotsaeng_back.global.response.CustomResponse;
 import java.util.List;
@@ -25,17 +29,24 @@ public class FollowRestController {
 
     //팔로우하기
     @Transactional
-    @PostMapping("/doFollow/{followerId}")
+    @PostMapping("/doFollow")
     public CustomResponse<Void> doFollow(@PathVariable("followerId") Long followerId , @RequestHeader("Authorization") String token){
         Long userId = jwtUtil.getUserIdFromToken(token);
+        if(followerId==userId){
+            throw new ApiException(FOLLOW_FAIL);
+        }
+
         followService.doFollow(followerId , userId);
         return new CustomResponse<>(HttpStatus.OK,"팔로우가 완료되었습니다.",null);
     }
     //언팔로우
     @Transactional
-    @DeleteMapping("/unFollow/{followerId}")
+    @DeleteMapping("/unFollow")
     public CustomResponse<Void> unFollow(@PathVariable("followerId") Long followerId , @RequestHeader("Authorization") String token){
         Long userId = jwtUtil.getUserIdFromToken(token);
+        if(followerId==userId){
+            throw new ApiException(UNFOLLOW_FAIL);
+        }
         followService.unFollow(followerId,userId);
         return new CustomResponse<>(HttpStatus.OK,"언팔로우 되었습니다.",null);
     }
