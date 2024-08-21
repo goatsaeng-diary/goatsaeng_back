@@ -8,13 +8,11 @@ import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
 import com.example.gotsaeng_back.global.response.CustomResponse;
 import com.example.gotsaeng_back.domain.post.entity.Post;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -34,7 +32,6 @@ public class PostController {
     @PostMapping("/create")
     public CustomResponse<Long> createPost(@RequestPart(name = "postCreateDTO") PostCreateDTO postCreateDTO, @RequestHeader("Authorization") String token, @RequestPart(name = "files") List<MultipartFile> files) {
         Post post = postService.createPost(postCreateDTO, files, token);
-
         return new CustomResponse<>(HttpStatus.OK, "게시물 작성 성공", post.getPostId());
     }
 
@@ -76,12 +73,13 @@ public class PostController {
 
     /**
      * 특정 게시물 보기
-     * @param postId    해당 게시물 Id
-     * @return  해당 게시물 상세정보
+     *
+     * @param postId 해당 게시물 Id
+     * @return 해당 게시물 상세정보
      */
     @GetMapping("/view/{postId}")
-    public CustomResponse<PostDetailDTO> postDetails(@PathVariable Long postId,@RequestHeader("Authorization") String token) {
-        PostDetailDTO postDetailDTO = postService.postDetails(postId,token);
+    public CustomResponse<PostDetailDTO> postDetails(@PathVariable Long postId, @RequestHeader("Authorization") String token) {
+        PostDetailDTO postDetailDTO = postService.postDetails(postId, token);
         return new CustomResponse<>(HttpStatus.OK, String.format("%d번 게시물 로딩 완료", postId), postDetailDTO);
     }
 
