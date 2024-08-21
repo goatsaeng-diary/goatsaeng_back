@@ -22,7 +22,7 @@ public interface RecordTargetRepository extends JpaRepository<RecordTarget, Long
 
     RecordTarget findByUserAndCustomRecordType_CustomRecordTypeId(User user, Long customRecordTypeId);
 
-    List<RecordTarget> findAllByUserIdAndRecordTypeId(Long userId, Long recordTypeId);
+    List<RecordTarget> findAllByUserUserIdAndRecordTypeRecordTypeId(Long userId, Long recordTypeId);
 
-    List<RecordTarget> findAllByUserIdAndCustomRecordTypeId(Long userId, Long customRecordTypeId);
+    List<RecordTarget> findAllByUserUserIdAndCustomRecordTypeCustomRecordTypeId(Long userId, Long customRecordTypeId);
 }

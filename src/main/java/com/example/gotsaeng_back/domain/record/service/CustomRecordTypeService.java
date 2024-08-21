@@ -11,5 +11,5 @@ public interface CustomRecordTypeService {
     CustomRecordType updateCustomRecordType(Long customRecordTypeId, String token, CustomRecordTypeRequestDto dto);
     void deleteCustomRecordType(Long customRecordTypeId, String token);
     CustomRecordType findByCustomRecordTypeId(Long customRecordTypeId);
-    public List<CustomRecordType> showAllCustomRecordType(String token);
+    List<CustomRecordType> showAllCustomRecordType(String token);
 }
