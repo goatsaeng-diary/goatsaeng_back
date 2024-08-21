@@ -3,7 +3,6 @@ package com.example.gotsaeng_back.domain.record.service.impl;
 import com.example.gotsaeng_back.domain.auth.entity.User;
 import com.example.gotsaeng_back.domain.auth.service.UserService;
 import com.example.gotsaeng_back.domain.record.dto.request.CustomRecordTypeRequestDto;
-import com.example.gotsaeng_back.domain.record.dto.response.CustomRecordTypeDto;
 import com.example.gotsaeng_back.domain.record.entity.CustomRecordType;
 import com.example.gotsaeng_back.domain.record.repository.CustomRecordTypeRepository;
 import com.example.gotsaeng_back.domain.record.service.CustomRecordTypeService;
@@ -87,7 +86,6 @@ public class CustomRecordTypeImpl implements CustomRecordTypeService {
         if(!user.getUserId().equals(customRecordType.getUser().getUserId())) {
             throw new ApiException(ExceptionEnum.CUSTOM_RECORD_TYPE_DELETE_FORBIDDEN);
         }
-
         customRecordTypeRepository.deleteById(customRecordTypeId);
     }
 
@@ -98,17 +96,18 @@ public class CustomRecordTypeImpl implements CustomRecordTypeService {
         return customRecordTypeRepository.findById(customRecordTypeId).orElseThrow(() -> new ApiException(ExceptionEnum.CUSTOM_RECORD_TYPE_NOT_FOUND));
     }
 
-    //단일 조회
+    //전체 조회 -- user에 대한 모든 것
     @Override
     @Transactional
-    public CustomRecordType showCustomRecordType(Long customRecordTypeId, String token) {
-        return customRecordTypeRepository.findById(customRecordTypeId).orElseThrow(() -> new ApiException(ExceptionEnum.CUSTOM_RECORD_TYPE_NOT_FOUND));
+    public List<CustomRecordType> showAllCustomRecordType(String token) {
+        Long userId = jwtUtil.getUserIdFromToken(token);
+        User user = userService.findById(userId);
+
+        if (user == null) {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
+
+        return customRecordTypeRepository.findAllByUser(user);
     }
 
-    //전체 조회
-    @Override
-    @Transactional
-    public List<CustomRecordTypeDto> showAllCustomRecordType(String token) {
-
-    }
 }
