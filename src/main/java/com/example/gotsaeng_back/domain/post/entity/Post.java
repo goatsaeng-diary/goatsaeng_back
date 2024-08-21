@@ -1,5 +1,6 @@
 package com.example.gotsaeng_back.domain.post.entity;
 
+import com.example.gotsaeng_back.domain.auth.entity.History;
 import com.example.gotsaeng_back.domain.auth.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -47,4 +48,7 @@ public class Post {
 
     @OneToMany(mappedBy = "post",cascade = CascadeType.ALL)
     private List<Like> likes;
+
+    @OneToMany(mappedBy = "post",cascade = CascadeType.ALL)
+    private List<History> histories;
 }
