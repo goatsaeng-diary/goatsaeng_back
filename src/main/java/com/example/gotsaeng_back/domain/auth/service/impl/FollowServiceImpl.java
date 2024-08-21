@@ -28,6 +28,10 @@ public class FollowServiceImpl implements FollowService {
         try{
             User followerUser = userService.findById(followerId);
             User followingUser = userService.findById(userId);
+            Follow check = followRepository.findByFollowerAndFollowing(followerUser,followingUser);
+            if(check!=null){
+                throw new ApiException(FOLLOW_FAIL);
+            }
             Follow follow = new Follow();
             follow.setFollower(followerUser);
             follow.setFollowing(followingUser);
@@ -42,6 +46,10 @@ public class FollowServiceImpl implements FollowService {
         try{
             User followerUser = userService.findById(followerId);
             User followingUser = userService.findById(userId);
+            Follow check = followRepository.findByFollowerAndFollowing(followerUser,followingUser);
+            if(check!=null){
+                throw new ApiException(FOLLOW_FAIL);
+            }
             Follow follow = new Follow();
             follow.setFollower(followerUser);
             follow.setFollowing(followingUser);
@@ -90,4 +98,6 @@ public class FollowServiceImpl implements FollowService {
             throw new ApiException(INTERNAL_SERVER_ERROR);
         }
     }
+
+
 }
