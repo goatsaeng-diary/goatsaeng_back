@@ -25,7 +25,7 @@ public class FollowRestController {
 
     //팔로우하기
     @Transactional
-    @PostMapping("/doFollow")
+    @PostMapping("/doFollow/{followerId}")
     public CustomResponse<Void> doFollow(@PathVariable("followerId") Long followerId , @RequestHeader("Authorization") String token){
         Long userId = jwtUtil.getUserIdFromToken(token);
         followService.doFollow(followerId , userId);
@@ -33,7 +33,7 @@ public class FollowRestController {
     }
     //언팔로우
     @Transactional
-    @DeleteMapping("/unFollow")
+    @DeleteMapping("/unFollow/{followerId}")
     public CustomResponse<Void> unFollow(@PathVariable("followerId") Long followerId , @RequestHeader("Authorization") String token){
         Long userId = jwtUtil.getUserIdFromToken(token);
         followService.unFollow(followerId,userId);

@@ -124,7 +124,7 @@ public class PostController {
     }
 
     @GetMapping("/recommend")
-    public CustomResponse<Page<PostDetailDTO>> recommendPosts(@RequestHeader("Authorization") String token, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public CustomResponse<Page<PostDetailDTO>> recommendPosts(@RequestHeader("Authorization") String token, @RequestParam(name = "page",defaultValue = "0") int page, @RequestParam(name = "size", defaultValue = "10") int size) {
         Page<PostDetailDTO> recommendedPosts = postService.recommendPosts(token, page, size);
         return new CustomResponse<>(HttpStatus.OK, "추천 게시물 로딩 완료", recommendedPosts);
     }
