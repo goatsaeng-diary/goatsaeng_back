@@ -1,13 +1,14 @@
 package com.example.gotsaeng_back.domain.post.service.impl;
 
 import com.example.gotsaeng_back.domain.auth.dto.FollowDto;
+import com.example.gotsaeng_back.domain.auth.entity.History;
 import com.example.gotsaeng_back.domain.auth.entity.User;
 import com.example.gotsaeng_back.domain.auth.service.FollowService;
+import com.example.gotsaeng_back.domain.auth.service.HistoryService;
 import com.example.gotsaeng_back.domain.auth.service.UserService;
 import com.example.gotsaeng_back.domain.post.dto.post.PostCreateDTO;
 import com.example.gotsaeng_back.domain.post.dto.post.PostDetailDTO;
 import com.example.gotsaeng_back.domain.post.dto.post.PostEditDTO;
-import com.example.gotsaeng_back.domain.post.dto.post.PostListDTO;
 import com.example.gotsaeng_back.domain.post.entity.Post;
 import com.example.gotsaeng_back.domain.post.repository.PostRepository;
 import com.example.gotsaeng_back.domain.post.service.LikeService;
@@ -22,9 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +37,8 @@ public class PostServiceImpl implements PostService {
     private final S3StorageService s3StorageService;
     private final LikeService likeService;
     private final FollowService followService;
+    private final HistoryService historyService;
+
     @Transactional
     @Override
     public void savePost(Post post) {
@@ -48,6 +51,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Transactional
+    @Override
     public void editPost(Long postId,List<MultipartFile> files,PostEditDTO postEditDTO) {
         Post post = getByPostId(postId);
         post.setTitle(postEditDTO.getTitle());
@@ -88,8 +92,11 @@ public class PostServiceImpl implements PostService {
 
 
         following.stream().map(FollowDto::getUserId).toList().forEach(userId -> {
+            List<Post> posts = new ArrayList<>();
             User user = userService.findById(userId);
-            List<Post> posts = postRepository.findAllByUser(user);
+
+            List<History> histories = historyService.findHistoriesByUser(user);
+            histories.forEach(history ->  posts.add(history.getPost()));
             posts.forEach(post -> {
                 Long score = post.getViewCount() + post.getComments().size() + post.getHistories().size() + followService.getFollowerList(userId).size();
                 map.put(post.getPostId(), score);
@@ -117,6 +124,7 @@ public class PostServiceImpl implements PostService {
                     .commentCount((long) post.getComments().size())
                     .createDate(post.getCreatedDate())
                     .content(post.getContent())
+                    .viewCount(post.getViewCount())
                     .title(post.getTitle())
                     .like(likeService.isLikePostByUser(post, token))
                     .files(post.getFiles())
@@ -141,12 +149,29 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDetailDTO postDetails(Post post,String token) {
+    @Transactional
+    public PostDetailDTO postDetails(Post post, String token) {
+        User user = userService.findById(jwtUtil.getUserIdFromToken(token));
+        boolean isContain = false;
+        List<History> histories = post.getHistories();
+        for (History history : histories) {
+            if (history.getUser().equals(user) && history.getViewDay().equals(LocalDate.now())) {
+                isContain = true;
+                break;
+            }
+        }
+        Long view = post.getViewCount();
+        if (!isContain) {
+            view++;
+        }
+        post.setViewCount(view);
+        savePost(post);
         boolean like = likeService.isLikePostByUser(post, token);
         return PostDetailDTO.builder()
                 .title(post.getTitle())
                 .content(post.getContent())
                 .files(post.getFiles())
+                .viewCount(view)
                 .nickname(post.getUser().getNickname())
                 .userImage(post.getUser().getUserImage())
                 .createDate(post.getCreatedDate())
@@ -170,12 +195,13 @@ public class PostServiceImpl implements PostService {
                         .content(post.getContent())
                         .files(post.getFiles())
                         .nickname(post.getUser().getNickname())
-                        .userImage(post.getUser().getUserImage()) // 추가적인 세부 정보 필요시 추가
+                        .userImage(post.getUser().getUserImage())
                         .commentCount((long) post.getComments().size())
-                        .likeCount(likeService.getLikes(post)) // 좋아요 수를 계산하는 로직 포함
+                        .likeCount(likeService.getLikes(post))
+                        .viewCount(post.getViewCount())
                         .like(likeService.isLikePostByUser(post, token))
                         .build())
-                .toList();
+                        .toList();
 
         return new PageImpl<>(postDetailDTOList, pageRequest, postDetailDTOList.size());
     }

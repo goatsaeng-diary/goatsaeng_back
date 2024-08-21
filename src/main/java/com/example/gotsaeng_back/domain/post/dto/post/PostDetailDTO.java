@@ -26,4 +26,6 @@ public class PostDetailDTO {
     private Long commentCount;
 
     private Long likeCount;
+
+    private Long viewCount;
 }

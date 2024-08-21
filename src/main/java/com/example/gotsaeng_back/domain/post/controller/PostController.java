@@ -44,7 +44,7 @@ public class PostController {
      * @return 수정한 게시물 Id
      */
     @PostMapping("/edit/{postId}")
-    public CustomResponse<Void> editPost(@PathVariable Long postId, @RequestBody PostEditDTO postEditDTO, @RequestParam("lists") List<MultipartFile> files) {
+    public CustomResponse<Void> editPost(@PathVariable Long postId, @RequestBody PostEditDTO postEditDTO, @RequestParam(name = "lists") List<MultipartFile> files) {
         postService.editPost(postId, files, postEditDTO);
         return new CustomResponse<>(HttpStatus.OK, String.format("%d번 게시물 수정", postId), null);
     }
@@ -68,7 +68,7 @@ public class PostController {
      * @return 해당 유저의 게시물들
      */
     @GetMapping("/list/{userId}")
-    public CustomResponse<Page<PostDetailDTO>> showPosts(@PathVariable Long userId, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, @RequestHeader("Authorization") String token) {
+    public CustomResponse<Page<PostDetailDTO>> showPosts(@PathVariable Long userId, @RequestParam(name = "page", defaultValue = "0") int page, @RequestParam(name = "size", defaultValue = "10") int size, @RequestHeader("Authorization") String token) {
         Page<PostDetailDTO> postListDTO = postService.userPost(userId, page, size, token);
         return new CustomResponse<>(HttpStatus.OK, String.format("%d번 사용자 게시물 로딩 완료", userId), postListDTO);
     }
@@ -92,7 +92,7 @@ public class PostController {
      * @return 모든 게시물
      */
     @GetMapping("/list")
-    public CustomResponse<Page<PostDetailDTO>> allPosts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, @RequestHeader("Authorization") String token) {
+    public CustomResponse<Page<PostDetailDTO>> allPosts(@RequestParam(name = "page", defaultValue = "0") int page, @RequestParam(name = "size", defaultValue = "10") int size, @RequestHeader("Authorization") String token) {
         Page<PostDetailDTO> postListDTO = postService.allPosts(page, size, token);
         return new CustomResponse<>(HttpStatus.OK, "모든 게시물 로딩 성공", postListDTO);
     }
