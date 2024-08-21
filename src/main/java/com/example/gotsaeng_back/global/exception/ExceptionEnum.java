@@ -24,7 +24,7 @@ public enum ExceptionEnum {
     INVALID_SIGNATURE(HttpStatus.BAD_REQUEST, "INVALID_SIGNATURE", "유효하지 않은 서명입니다."),
     ILLEGAL_ARGUMENT(HttpStatus.BAD_REQUEST, "ILLEGAL_ARGUMENT", "잘못된 인자입니다."),
     JWT_FILTER_INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "JWT_FILTER_INTERNAL_ERROR", "JWT 필터 내부 오류입니다."),
-
+    SOCIAL_LOGIN_FAIL(HttpStatus.BAD_REQUEST,"소셜로그인실패"),
     // User
     EXIST_EMAIL(HttpStatus.BAD_REQUEST, "EXIST_EMAIL", "이미 있는 이메일 입니다."),
     NO_SEARCH_EMAIL(HttpStatus.BAD_REQUEST,"NO_SEARCH_EMAIL","없는 이메일 입니다"),
