@@ -73,4 +73,11 @@ public class LikeServiceImpl implements LikeService {
         Post post = postService.getByPostId(postId);
         return (long) likeRepository.findLikesByPost(post).size();
     }
+
+    @Override
+    public List<Long> getLikePosts(String token) {
+        User user = userService.findById(jwtUtil.getUserIdFromToken(token));
+        List<Like> likesByLikeUser = likeRepository.findLikesByLikeUser(user);
+        return likesByLikeUser.stream().map(like -> like.getPost().getPostId()).toList();
+    }
 }

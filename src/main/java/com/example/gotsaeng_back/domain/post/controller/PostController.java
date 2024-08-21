@@ -4,6 +4,7 @@ import com.example.gotsaeng_back.domain.post.dto.post.*;
 import com.example.gotsaeng_back.domain.post.service.LikeService;
 import com.example.gotsaeng_back.domain.post.service.PostService;
 import com.example.gotsaeng_back.global.file.S3StorageService;
+import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
 import com.example.gotsaeng_back.global.response.CustomResponse;
 import com.example.gotsaeng_back.domain.post.entity.Post;
 
@@ -22,6 +23,7 @@ import java.util.List;
 public class PostController {
     private final PostService postService;
     private final LikeService likeService;
+    private final JwtUtil jwtUtil;
 
     /**
      * 게시물 생성
@@ -111,6 +113,11 @@ public class PostController {
 
     @GetMapping("/like/list/{postId}")
     public CustomResponse<List<LikeUserDTO>> likeList(@PathVariable Long postId) {
-        return new CustomResponse<>(HttpStatus.OK,String.format("%d번 게시물 좋아요 리스트"),likeService.getLikeUsers(postId));
+        return new CustomResponse<>(HttpStatus.OK,String.format("%d번 게시물 좋아요 리스트",postId),likeService.getLikeUsers(postId));
+    }
+
+    @GetMapping("/like/list")
+    public CustomResponse<List<Long>> likePostList(@RequestHeader("Authorization") String token) {
+        return new CustomResponse<>(HttpStatus.OK, String.format("%d번 유저 좋아요 리스트", jwtUtil.getUserIdFromToken(token)), likeService.getLikePosts(token));
     }
 }

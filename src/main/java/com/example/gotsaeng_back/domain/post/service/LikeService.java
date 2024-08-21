@@ -12,5 +12,5 @@ public interface LikeService {
     List<LikeUserDTO> getLikeUsers(Long postId);
     boolean isLikePostByUser(Long postId, String token);
     Long getLikes(Long postId);
-
+    List<Long> getLikePosts(String token);
 }
