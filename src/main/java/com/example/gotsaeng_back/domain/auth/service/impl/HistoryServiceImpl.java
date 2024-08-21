@@ -24,4 +24,9 @@ public class HistoryServiceImpl implements HistoryService {
     public List<History> findHistoriesByPost(Post post) {
         return historyRepository.findHistoriesByPost(post);
     }
+
+    @Override
+    public void saveHistory(History history) {
+        historyRepository.save(history);
+    }
 }

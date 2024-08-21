@@ -9,4 +9,6 @@ import java.util.List;
 public interface HistoryService {
     List<History> findHistoriesByUser(User user);
     List<History> findHistoriesByPost(Post post);
+
+    void saveHistory(History history);
 }

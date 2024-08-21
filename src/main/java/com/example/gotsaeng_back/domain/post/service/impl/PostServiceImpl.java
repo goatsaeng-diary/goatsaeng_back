@@ -163,6 +163,13 @@ public class PostServiceImpl implements PostService {
         Long view = post.getViewCount();
         if (!isContain) {
             view++;
+            History history = new History();
+            history.builder()
+                    .user(user)
+                    .post(post)
+                    .viewDay(LocalDate.now())
+                    .build();
+            historyService.saveHistory(history);
         }
         post.setViewCount(view);
         savePost(post);
