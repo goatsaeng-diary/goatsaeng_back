@@ -80,7 +80,7 @@ public class PostController {
      * @return 해당 게시물 상세정보
      */
     @GetMapping("/view/{postId}")
-    public CustomResponse<PostDetailDTO> postDetails(@PathVariable Long postId, @RequestHeader("Authorization") String token) {
+    public CustomResponse<PostDetailDTO> postDetails(@PathVariable(name = "postId") Long postId, @RequestHeader("Authorization") String token) {
         Post post = postService.getByPostId(postId);
         PostDetailDTO postDetailDTO = postService.postDetails(post, token);
         return new CustomResponse<>(HttpStatus.OK, String.format("%d번 게시물 로딩 완료", postId), postDetailDTO);
