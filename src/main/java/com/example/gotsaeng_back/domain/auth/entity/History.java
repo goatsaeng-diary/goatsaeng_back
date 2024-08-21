@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "Histories")
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

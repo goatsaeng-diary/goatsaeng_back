@@ -44,7 +44,7 @@ public class PostController {
      * @return 수정한 게시물 Id
      */
     @PostMapping("/edit/{postId}")
-    public CustomResponse<Void> editPost(@PathVariable Long postId, @RequestBody PostEditDTO postEditDTO, @RequestParam(name = "lists") List<MultipartFile> files) {
+    public CustomResponse<Void> editPost(@PathVariable(name="postId") Long postId, @RequestBody PostEditDTO postEditDTO, @RequestParam(name = "lists") List<MultipartFile> files) {
         postService.editPost(postId, files, postEditDTO);
         return new CustomResponse<>(HttpStatus.OK, String.format("%d번 게시물 수정", postId), null);
     }
@@ -56,7 +56,7 @@ public class PostController {
      * @return 삭제할 게시물 Id
      */
     @DeleteMapping("/delete/{postId}")
-    public CustomResponse<Void> deletePost(@PathVariable Long postId) {
+    public CustomResponse<Void> deletePost(@PathVariable(name = "postId") Long postId) {
         postService.deletePost(postId);
         return new CustomResponse<>(HttpStatus.OK, String.format("%d번 게시물 삭제 완료", postId), null);
     }
@@ -68,7 +68,7 @@ public class PostController {
      * @return 해당 유저의 게시물들
      */
     @GetMapping("/list/{userId}")
-    public CustomResponse<Page<PostDetailDTO>> showPosts(@PathVariable Long userId, @RequestParam(name = "page", defaultValue = "0") int page, @RequestParam(name = "size", defaultValue = "10") int size, @RequestHeader("Authorization") String token) {
+    public CustomResponse<Page<PostDetailDTO>> showPosts(@PathVariable(name = "userId") Long userId, @RequestParam(name = "page", defaultValue = "0") int page, @RequestParam(name = "size", defaultValue = "10") int size, @RequestHeader("Authorization") String token) {
         Page<PostDetailDTO> postListDTO = postService.userPost(userId, page, size, token);
         return new CustomResponse<>(HttpStatus.OK, String.format("%d번 사용자 게시물 로딩 완료", userId), postListDTO);
     }
@@ -103,7 +103,7 @@ public class PostController {
      * @return
      */
     @PostMapping("/like/{postId}")
-    public CustomResponse<Void> like(@PathVariable Long postId, @RequestBody boolean like, @RequestHeader("Authorization") String token) {
+    public CustomResponse<Void> like(@PathVariable(name = "postId") Long postId, @RequestBody boolean like, @RequestHeader("Authorization") String token) {
         Post post = postService.getByPostId(postId);
         if (like) {
             likeService.addLike(post, token);
@@ -113,7 +113,7 @@ public class PostController {
     }
 
     @GetMapping("/like/list/{postId}")
-    public CustomResponse<List<LikeUserDTO>> likeList(@PathVariable Long postId) {
+    public CustomResponse<List<LikeUserDTO>> likeList(@PathVariable(name = "postId") Long postId) {
         Post post = postService.getByPostId(postId);
         return new CustomResponse<>(HttpStatus.OK, String.format("%d번 게시물 좋아요 리스트", post.getPostId()), likeService.getLikeUsers(post));
     }

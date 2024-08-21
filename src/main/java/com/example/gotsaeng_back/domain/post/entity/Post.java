@@ -25,6 +25,7 @@ public class Post {
     private String title;
 
     @ElementCollection
+    @Column(name = "files")
     private List<String> files;
 
     @Column(nullable = false)
