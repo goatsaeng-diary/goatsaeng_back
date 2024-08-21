@@ -7,11 +7,13 @@ import com.example.gotsaeng_back.global.file.S3StorageService;
 import com.example.gotsaeng_back.global.response.CustomResponse;
 import com.example.gotsaeng_back.domain.post.entity.Post;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -30,6 +32,7 @@ public class PostController {
     @PostMapping("/create")
     public CustomResponse<Long> createPost(@RequestPart(name = "postCreateDTO") PostCreateDTO postCreateDTO, @RequestHeader("Authorization") String token, @RequestPart(name = "files") List<MultipartFile> files) {
         Post post = postService.createPost(postCreateDTO, files, token);
+
         return new CustomResponse<>(HttpStatus.OK, "게시물 작성 성공", post.getPostId());
     }
 
