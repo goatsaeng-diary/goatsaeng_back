@@ -39,6 +39,7 @@ public class PostServiceImpl implements PostService {
     private final S3StorageService s3StorageService;
     private final LikeService likeService;
     private final HistoryService historyService;
+    private final FollowService followService;
 
     @Transactional
     @Override
@@ -108,27 +109,27 @@ public class PostServiceImpl implements PostService {
                 .map(Map.Entry::getKey)
                 .toList();
 
+        return getPostDetailDTOS(token, page, size, sortedPosts);
+
+    }
+
+    private Page<PostDetailDTO> getPostDetailDTOS(String token, int page, int size, List<Post> sortedPosts) {
         int start = Math.min(page * size, sortedPosts.size());
         int end = Math.min((page + 1) * size, sortedPosts.size());
         List<Post> pageContentKeys = sortedPosts.subList(start, end);
 
+        return getPosts(pageContentKeys, PageRequest.of(page, size), token);
+    }
 
-        List<PostDetailDTO> postDetailDTOList = pageContentKeys.stream().map(post ->
-             PostDetailDTO.builder()
-                    .nickname(post.getUser().getNickname())
-                    .likeCount((long) post.getLikes().size())
-                    .commentCount((long) post.getComments().size())
-                    .createDate(post.getCreatedDate())
-                    .content(post.getContent())
-                    .viewCount(post.getViewCount())
-                    .title(post.getTitle())
-                    .like(likeService.isLikePostByUser(post, token))
-                    .files(post.getFiles())
-                    .userImage(post.getUser().getUserImage())
-                    .build()
-        ).toList();
+    public Page<PostDetailDTO> followingPosts(String token, int page, int size) {
+        List<FollowDto> followingList = followService.getFollowingList(jwtUtil.getUserIdFromToken(token));
+        List<Post> followingPosts = new ArrayList<>();
+        followingList.forEach(followDto -> {
+            User user = userService.findById(followDto.getUserId());
+            followingPosts.addAll(postRepository.findAllByUser(user));
+        });
 
-        return new PageImpl<>(postDetailDTOList, PageRequest.of(page, size), sortedPosts.size());
+        return getPostDetailDTOS(token, page, size, followingPosts);
     }
 
     @Override
