@@ -13,7 +13,7 @@ public enum ExceptionEnum {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "서버 오류 발생"),
     FORBIDDEN(HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다."),
     DUPLICATE(HttpStatus.CONFLICT,"DUPLICATED" , "중복된 아이디 입니다"),
-    DUPLICATEMAIL(HttpStatus.CONFLICT,"DUPLICATEDEMAIL" , "중복된 이메일 입니다"),
+    DUPLICATE_MAIL(HttpStatus.CONFLICT,"DUPLICATED_EMAIL" , "중복된 이메일 입니다"),
 
     // Token Exception
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "EXPIRED_TOKEN", "토큰이 만료되었습니다."),
@@ -31,9 +31,10 @@ public enum ExceptionEnum {
     FAIL_EMAIL_SEND(HttpStatus.BAD_REQUEST,"FAIL_EMAIL_SEND","이메일 발송 오류"),
     NOT_ALLOW_FILED(HttpStatus.BAD_REQUEST, "NOT_ALLOW_FILED", "이메일 혹은 비밀번호 형식이 틀립니다."),
     DIFFERENT_PASSWORD(HttpStatus.BAD_REQUEST, "DIFFERENT_PASSWORD", "비밀번호가 둘이 다릅니다."),
-    FOLLOW_FAIL(HttpStatus.BAD_REQUEST, "FOLLOW_FAIL", "팔로우에 실패하였습니다"),
-    UNFOLLOW_FAIL(HttpStatus.BAD_REQUEST, "UNFOLLOW_FAIL", "팔로우에 실패하였습니다"),
-    ID_PASSWORD_FAIL(HttpStatus.BAD_REQUEST,"LOGIN_FAIL","아이디 또는 비밀번호가 틀렸습니다"),
+    FOLLOW_FAIL(HttpStatus.BAD_REQUEST, "FOLLOW_FAIL", "팔로우에 실패하였습니다."),
+    UNFOLLOW_FAIL(HttpStatus.BAD_REQUEST, "UNFOLLOW_FAIL", "팔로우에 실패하였습니다."),
+    ID_PASSWORD_FAIL(HttpStatus.BAD_REQUEST,"LOGIN_FAIL","아이디 또는 비밀번호가 틀렸습니다."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND,"USER_NOT_FOUND","유저를 찾지 못했습니다."),
 
     // Comment
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT_NOT_FOUND", "등록된 댓글이 없습니다."),
@@ -65,7 +66,14 @@ public enum ExceptionEnum {
     CUSTOM_RECORD_DUPLICATE(HttpStatus.CONFLICT, "CUSTOM_RECORD_DUPLICATE", "이미 등록된 커스텀 기록입니다."),
     CUSTOM_RECORD_NOT_FOUND(HttpStatus.NOT_FOUND, "CUSTOM_RECORD_NOT_FOUND", "등록된 커스텀 기록이 없습니다."),
     CUSTOM_RECORD_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "CUSTOM_RECORD_UPDATE_FORBIDDEN", "기록 수정 권한이 없습니다."),
-    CUSTOM_RECORD_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "CUSTOM_RECORD_DELETE_FORBIDDEN", "기록 삭제 권한이 없습니다.");
+    CUSTOM_RECORD_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "CUSTOM_RECORD_DELETE_FORBIDDEN", "기록 삭제 권한이 없습니다."),
+
+    // Post
+    EDIT_NOT_COMPLETED(HttpStatus.INTERNAL_SERVER_ERROR, "EDIT_NOT_COMPLETED", "게시물을 수정하지 못했습니다."),
+    CREATE_NOT_COMPLETED(HttpStatus.INTERNAL_SERVER_ERROR,"CREATE_NOT_COMPLETED", "게시물을 작성하지 못했습니다."),
+    DELETE_NOT_COMPLETED(HttpStatus.INTERNAL_SERVER_ERROR, "DELETE_NOT_COMPLETED", "게시물을 삭제하지 못했습니다."),
+    HISTORY_SAVE_NOT_COMPLETED(HttpStatus.INTERNAL_SERVER_ERROR, "HISTORY_SAVE_NOT_COMPLETED", "시청기록을 저장하지 못했습니다."),
+    VIEW_NOT_INCREASED(HttpStatus.INTERNAL_SERVER_ERROR,"VIEW_NOT_INCREASED","조회수를 수정하지 못했습니다.");
 
     private final HttpStatus status;
     private final String code;

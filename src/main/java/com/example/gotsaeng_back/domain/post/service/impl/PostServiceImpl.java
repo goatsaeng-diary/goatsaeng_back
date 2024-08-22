@@ -13,6 +13,8 @@ import com.example.gotsaeng_back.domain.post.entity.Post;
 import com.example.gotsaeng_back.domain.post.repository.PostRepository;
 import com.example.gotsaeng_back.domain.post.service.LikeService;
 import com.example.gotsaeng_back.domain.post.service.PostService;
+import com.example.gotsaeng_back.global.exception.ApiException;
+import com.example.gotsaeng_back.global.exception.ExceptionEnum;
 import com.example.gotsaeng_back.global.file.S3StorageService;
 import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +38,6 @@ public class PostServiceImpl implements PostService {
     private final UserService userService;
     private final S3StorageService s3StorageService;
     private final LikeService likeService;
-    private final FollowService followService;
     private final HistoryService historyService;
 
     @Transactional
@@ -49,46 +50,60 @@ public class PostServiceImpl implements PostService {
     public Post getByPostId(Long postId) {
         return postRepository.findById(postId).orElseThrow(()-> new RuntimeException("게시물이 없습니다."));
     }
-
     @Transactional
     @Override
     public void editPost(Long postId,List<MultipartFile> files,PostEditDTO postEditDTO) {
         Post post = getByPostId(postId);
         post.setTitle(postEditDTO.getTitle());
         post.setContent(postEditDTO.getContent());
-        if (!files.isEmpty()) {
-            List<String> list = files.stream()
-                    .map(s3StorageService::uploadFile)
-                    .toList();
-            post.setFiles(list);
+        try {
+            if (!files.isEmpty()) {
+                List<String> list = files.stream()
+                        .map(s3StorageService::uploadFile)
+                        .toList();
+                post.setFiles(list);
+            } else post.setFiles(null);
+            post.setUpdatedDate(LocalDateTime.now());
+            savePost(post);
+        } catch (Exception e) {
+            throw new ApiException(ExceptionEnum.EDIT_NOT_COMPLETED);
         }
-        else post.setFiles(null);
-        post.setUpdatedDate(LocalDateTime.now());
-        savePost(post);
+
     }
 
     @Override
     @Transactional
     public Post createPost(PostCreateDTO postCreateDTO, List<MultipartFile> files, String token) {
         Post post = new Post();
-        post.setTitle(postCreateDTO.getTitle());
-        post.setContent(postCreateDTO.getContent());
-        List<String> list = files.stream()
-                .map(s3StorageService::uploadFile)
-                .toList();
-        post.setFiles(list);
-        String username = jwtUtil.getUserNameFromToken(token);
-        User user = userService.findByUsername(username);
-        post.setUser(user);
-        savePost(post);
+        try {
+            post.setTitle(postCreateDTO.getTitle());
+            post.setContent(postCreateDTO.getContent());
+            List<String> list = files.stream()
+                    .map(s3StorageService::uploadFile)
+                    .toList();
+            post.setFiles(list);
+            String username = jwtUtil.getUserNameFromToken(token);
+            User user = userService.findByUsername(username);
+            post.setUser(user);
+            savePost(post);
+        } catch (Exception e) {
+            throw new ApiException(ExceptionEnum.CREATE_NOT_COMPLETED);
+        }
+
         return post;
     }
 
     @Override
     public Page<PostDetailDTO> recommendPosts(String token, int page, int size) {
         List<Object[]> results = postRepository.findPostsAndScores();
+        User user = userService.findById(jwtUtil.getUserIdFromToken(token));
         List<Post> sortedPosts = results.stream()
                 .map(result -> new AbstractMap.SimpleEntry<>((Post) result[0], (Long) result[1]))
+                .filter(entry -> {
+                    Post post = entry.getKey();
+                    return post.getHistories().stream()
+                            .noneMatch(history -> history.getUser().equals(user) && history.getViewDay().equals(LocalDate.now()));
+                })
                 .sorted(Map.Entry.<Post, Long>comparingByValue().reversed())
                 .map(Map.Entry::getKey)
                 .toList();
@@ -119,13 +134,22 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void deletePost(Long postId) {
-        postRepository.deleteById(postId);
+        try {
+            postRepository.deleteById(postId);
+        } catch (Exception e) {
+            throw new ApiException(ExceptionEnum.DELETE_NOT_COMPLETED);
+        }
+
     }
 
     @Override
     public Page<PostDetailDTO> userPost(Long userId, int page, int size, String token) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        List<Post> posts = postRepository.findAllByUser(userService.findById(userId));
+        User user = userService.findById(userId);
+        if (user == null) {
+            throw new ApiException(ExceptionEnum.USER_NOT_FOUND);
+        }
+        List<Post> posts = postRepository.findAllByUser(user);
         return getPosts(posts, pageRequest, token);
     }
 
@@ -144,14 +168,24 @@ public class PostServiceImpl implements PostService {
         Long view = post.getViewCount();
         if (!isContain) {
             view++;
-            historyService.saveHistory(History.builder()
-                    .user(user)
-                    .post(post)
-                    .viewDay(LocalDate.now())
-                    .build());
+            try {
+                historyService.saveHistory(History.builder()
+                        .user(user)
+                        .post(post)
+                        .viewDay(LocalDate.now())
+                        .build());
+            } catch (Exception e) {
+                throw new ApiException(ExceptionEnum.HISTORY_SAVE_NOT_COMPLETED);
+            }
+
         }
-        post.setViewCount(view);
-        savePost(post);
+        try {
+            post.setViewCount(view);
+            savePost(post);
+        } catch (Exception e) {
+            throw new ApiException(ExceptionEnum.VIEW_NOT_INCREASED);
+        }
+
         boolean like = likeService.isLikePostByUser(post, token);
         return PostDetailDTO.builder()
                 .title(post.getTitle())
