@@ -2,24 +2,19 @@ package com.example.gotsaeng_back.domain.auth.controller;
 
 
 import static com.example.gotsaeng_back.global.exception.ExceptionEnum.DUPLICATE;
-import static com.example.gotsaeng_back.global.exception.ExceptionEnum.DUPLICATEMAIL;
+import static com.example.gotsaeng_back.global.exception.ExceptionEnum.DUPLICATE_MAIL;
 import static com.example.gotsaeng_back.global.exception.ExceptionEnum.FAIL_EMAIL_SEND;
 import static com.example.gotsaeng_back.global.exception.ExceptionEnum.NO_SEARCH_EMAIL;
 
 import com.example.gotsaeng_back.domain.auth.dto.LoginDto;
 import com.example.gotsaeng_back.domain.auth.dto.SignUpDto;
 import com.example.gotsaeng_back.domain.auth.dto.TokenDto;
-import com.example.gotsaeng_back.domain.auth.dto.UserUpdateDto;
 import com.example.gotsaeng_back.domain.auth.entity.User;
 import com.example.gotsaeng_back.domain.auth.service.UserService;
 import com.example.gotsaeng_back.global.exception.ApiException;
 import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
 import com.example.gotsaeng_back.global.response.CustomResponse;
-import jakarta.servlet.http.HttpServletResponse;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,7 +27,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -86,7 +80,7 @@ public class UserRestController {
     public CustomResponse<?> emailDuplicate(@PathVariable("email") String email){
         User duplicateEmail = userService.findByEmail(email);
         if(duplicateEmail.getEmail()!=null){
-            throw new ApiException(DUPLICATEMAIL);
+            throw new ApiException(DUPLICATE_MAIL);
         }else{
             System.out.println("사용가능");
             return new CustomResponse<>(HttpStatus.OK,"사용 가능한 이메일 입니다.",duplicateEmail.getEmail());
