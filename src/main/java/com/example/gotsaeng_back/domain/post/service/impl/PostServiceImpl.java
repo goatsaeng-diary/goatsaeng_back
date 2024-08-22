@@ -87,8 +87,14 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<PostDetailDTO> recommendPosts(String token, int page, int size) {
         List<Object[]> results = postRepository.findPostsAndScores();
+        User user = userService.findById(jwtUtil.getUserIdFromToken(token));
         List<Post> sortedPosts = results.stream()
                 .map(result -> new AbstractMap.SimpleEntry<>((Post) result[0], (Long) result[1]))
+                .filter(entry -> {
+                    Post post = entry.getKey();
+                    return post.getHistories().stream()
+                            .noneMatch(history -> history.getUser().equals(user) && history.getViewDay().equals(LocalDate.now()));
+                })
                 .sorted(Map.Entry.<Post, Long>comparingByValue().reversed())
                 .map(Map.Entry::getKey)
                 .toList();
