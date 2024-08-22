@@ -73,8 +73,12 @@ public enum ExceptionEnum {
     CREATE_NOT_COMPLETED(HttpStatus.INTERNAL_SERVER_ERROR,"CREATE_NOT_COMPLETED", "게시물을 작성하지 못했습니다."),
     DELETE_NOT_COMPLETED(HttpStatus.INTERNAL_SERVER_ERROR, "DELETE_NOT_COMPLETED", "게시물을 삭제하지 못했습니다."),
     HISTORY_SAVE_NOT_COMPLETED(HttpStatus.INTERNAL_SERVER_ERROR, "HISTORY_SAVE_NOT_COMPLETED", "시청기록을 저장하지 못했습니다."),
-    VIEW_NOT_INCREASED(HttpStatus.INTERNAL_SERVER_ERROR,"VIEW_NOT_INCREASED","조회수를 수정하지 못했습니다.");
+    VIEW_NOT_INCREASED(HttpStatus.INTERNAL_SERVER_ERROR,"VIEW_NOT_INCREASED","조회수를 수정하지 못했습니다."),
 
+    // S3
+    S3_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"S3_UPLOAD_FAIL","S3에 업로드하지 못했습니다."),
+    S3_DOWNLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "S3_DOWNLOAD_FAIL", "S3에서 불러오지 못했습니다."),
+    S3_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"S3_DELETE_FAIL","S3에서 삭제하지 못했습니다.");
     private final HttpStatus status;
     private final String code;
     private String message;

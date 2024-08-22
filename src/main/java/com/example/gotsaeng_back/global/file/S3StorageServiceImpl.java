@@ -3,6 +3,9 @@ package com.example.gotsaeng_back.global.file;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.UUID;
+
+import com.example.gotsaeng_back.global.exception.ApiException;
+import com.example.gotsaeng_back.global.exception.ExceptionEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -44,17 +47,22 @@ public class S3StorageServiceImpl implements S3StorageService{
             );
             return key;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ApiException(ExceptionEnum.S3_UPLOAD_FAIL);
         }
     }
 
 
     @Override
     public InputStream downloadFile(String key) {
-        return s3Client.getObject(GetObjectRequest.builder()
-                .bucket(bucketName)
-                .key(key)
-                .build());
+        try {
+            return s3Client.getObject(GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build());
+        } catch (Exception e) {
+            throw new ApiException(ExceptionEnum.S3_DOWNLOAD_FAIL);
+        }
+
     }
 
 
@@ -66,7 +74,7 @@ public class S3StorageServiceImpl implements S3StorageService{
                     .key(file)
                     .build());
         } catch (Exception e) {
-            throw new RuntimeException("Failed to delete file from S3", e);
+            throw new ApiException(ExceptionEnum.S3_DELETE_FAIL);
         }
     }
 }
