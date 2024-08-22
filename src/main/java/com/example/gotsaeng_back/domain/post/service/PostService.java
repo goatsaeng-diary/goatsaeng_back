@@ -31,4 +31,5 @@ public interface PostService {
     Page<PostDetailDTO> getPosts(List<Post> posts, PageRequest pageRequest, String token);
 
     Page<PostDetailDTO> recommendPosts(String token, int page, int size);
+
 }
