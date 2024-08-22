@@ -86,39 +86,20 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<PostDetailDTO> recommendPosts(String token, int page, int size) {
-
-        List<FollowDto> following = followService.getFollowingList(jwtUtil.getUserIdFromToken(token));
-        Map<Long, Long> map = new HashMap<>();
-
-
-        following.stream().map(FollowDto::getUserId).toList().forEach(userId -> {
-            List<Post> posts = new ArrayList<>();
-            User user = userService.findById(userId);
-
-            List<History> histories = historyService.findHistoriesByUser(user);
-            histories.forEach(history ->  posts.add(history.getPost()));
-            posts.forEach(post -> {
-                Long score = post.getViewCount() + post.getComments().size() + post.getHistories().size() + followService.getFollowerList(userId).size();
-                map.put(post.getPostId(), score);
-            });
-        });
-
-
-        List<Long> sortedKeys = map.entrySet()
-                .stream()
-                .sorted(Map.Entry.<Long, Long>comparingByValue().reversed())
+        List<Object[]> results = postRepository.findPostsAndScores();
+        List<Post> sortedPosts = results.stream()
+                .map(result -> new AbstractMap.SimpleEntry<>((Post) result[0], (Long) result[1]))
+                .sorted(Map.Entry.<Post, Long>comparingByValue().reversed())
                 .map(Map.Entry::getKey)
                 .toList();
 
+        int start = Math.min(page * size, sortedPosts.size());
+        int end = Math.min((page + 1) * size, sortedPosts.size());
+        List<Post> pageContentKeys = sortedPosts.subList(start, end);
 
-        int start = Math.min(page * size, sortedKeys.size());
-        int end = Math.min((page + 1) * size, sortedKeys.size());
-        List<Long> pageContentKeys = sortedKeys.subList(start, end);
 
-
-        List<PostDetailDTO> content = pageContentKeys.stream().map(postId -> {
-            Post post = postRepository.findByPostId(postId);
-            return PostDetailDTO.builder()
+        List<PostDetailDTO> postDetailDTOList = pageContentKeys.stream().map(post ->
+             PostDetailDTO.builder()
                     .nickname(post.getUser().getNickname())
                     .likeCount((long) post.getLikes().size())
                     .commentCount((long) post.getComments().size())
@@ -129,10 +110,10 @@ public class PostServiceImpl implements PostService {
                     .like(likeService.isLikePostByUser(post, token))
                     .files(post.getFiles())
                     .userImage(post.getUser().getUserImage())
-                    .build();
-        }).toList();
+                    .build()
+        ).toList();
 
-        return new PageImpl<>(content, PageRequest.of(page, size), sortedKeys.size());
+        return new PageImpl<>(postDetailDTOList, PageRequest.of(page, size), sortedPosts.size());
     }
 
     @Override
