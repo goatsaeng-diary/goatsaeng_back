@@ -16,12 +16,15 @@ import com.example.gotsaeng_back.domain.post.dto.post.PostCreateDTO;
 import com.example.gotsaeng_back.domain.post.dto.post.PostDetailDTO;
 import com.example.gotsaeng_back.domain.post.dto.post.PostEditDTO;
 import com.example.gotsaeng_back.domain.post.entity.Post;
+import com.example.gotsaeng_back.domain.post.entity.RecordType;
 import com.example.gotsaeng_back.domain.post.repository.PostRepository;
 import com.example.gotsaeng_back.domain.post.service.LikeService;
 import com.example.gotsaeng_back.domain.post.service.PostService;
 import com.example.gotsaeng_back.global.exception.ApiException;
 import com.example.gotsaeng_back.global.exception.ExceptionEnum;
 import com.example.gotsaeng_back.global.file.S3StorageService;
+import com.example.gotsaeng_back.global.gptapi.dto.response.ChatGPTResponse;
+import com.example.gotsaeng_back.global.gptapi.service.impl.AiCallService;
 import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +33,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -47,6 +51,7 @@ public class PostServiceImpl implements PostService {
     private final LikeService likeService;
     private final HistoryService historyService;
     private final FollowService followService;
+    private final AiCallService aiCallService;
 
     @Transactional
     @Override
@@ -56,11 +61,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Post getByPostId(Long postId) {
-        return postRepository.findById(postId).orElseThrow(()-> new RuntimeException("게시물이 없습니다."));
+        return postRepository.findById(postId).orElseThrow(() -> new RuntimeException("게시물이 없습니다."));
     }
+
     @Transactional
     @Override
-    public void editPost(Long postId,List<MultipartFile> files,PostEditDTO postEditDTO) {
+    public void editPost(Long postId, List<MultipartFile> files, PostEditDTO postEditDTO) {
         Post post = getByPostId(postId);
         post.setTitle(postEditDTO.getTitle());
         post.setContent(postEditDTO.getContent());
@@ -84,6 +90,31 @@ public class PostServiceImpl implements PostService {
         if (files.size() % 2 != 0) {
             throw new ApiException(ExceptionEnum.END_NOT_FOUND);
         }
+
+        String type = null;
+        for (int i = 0; i < files.size(); i++) {
+            try {
+                ChatGPTResponse response = aiCallService.requestImageAnalysis(files.get(i), "이 사진은 무엇을 인증하고 있나요? 운동을 인증하는거 같으면 '운동', 공부를 인증하는거 같으면 '공부', 아무것도 아닌거같으면 'none'이라는 대답만 보내줘.");
+                String content = response.getChoices().getFirst().getMessage().getContent();
+                if (content.equals("none")) {
+                    throw new ApiException(ExceptionEnum.DIFFERENT_TYPE_FILE);
+                }
+                if (type != null && !type.equals(content)) {
+                    throw new ApiException(ExceptionEnum.DIFFERENT_TYPE_FILE);
+                }
+                type = content;
+            } catch (IOException e) {
+                throw new ApiException(ExceptionEnum.FILE_NOT_FOUND);
+            }
+        }
+        RecordType recordType = null;
+        if (type.equals("운동")) {
+            recordType = RecordType.EXERCISE;
+        } else{
+            recordType = RecordType.STUDY;
+        }
+
+
 
         // 각 파일의 GPS 정보 및 시간 정보 추출
         List<GeoLocation> geoLocations = new ArrayList<>();
@@ -125,6 +156,7 @@ public class PostServiceImpl implements PostService {
 
         return savePost(Post.builder()
                 .files(validFiles)
+                .recordType(recordType)
                 .content(postCreateDTO.getContent())
                 .createdDate(LocalDateTime.now())
                 .title(postCreateDTO.getTitle())
@@ -135,31 +167,31 @@ public class PostServiceImpl implements PostService {
     // 파일의 거리 및 시간 검증을 수행하고 업로드하는 메서드
     private List<String> validateFilesAndUpload(List<MultipartFile> files, List<GeoLocation> geoLocations, List<Date> captureDates) {
         List<String> validFiles = new ArrayList<>();
-        for (int i = 0; i < geoLocations.size() - 1; i+=2) {
-                // 거리 계산
-                double distance = calculateDistance(
-                        geoLocations.get(i).getLatitude(), geoLocations.get(i).getLongitude(),
-                        geoLocations.get(i+1).getLatitude(), geoLocations.get(i+1).getLongitude()
-                );
+        for (int i = 0; i < geoLocations.size() - 1; i += 2) {
+            // 거리 계산
+            double distance = calculateDistance(
+                    geoLocations.get(i).getLatitude(), geoLocations.get(i).getLongitude(),
+                    geoLocations.get(i + 1).getLatitude(), geoLocations.get(i + 1).getLongitude()
+            );
 
-                // 시간 비교
-                if (captureDates.get(i).after(captureDates.get(i+1))) {
-                    throw new ApiException(ExceptionEnum.TIME_INCONSISTENT);
-                }
-
-                if (distance <= 50.0) {
-                    MultipartFile start = files.get(i);
-                    MultipartFile end = files.get(i+1);
-
-                    s3StorageService.uploadFile(start);
-                    s3StorageService.uploadFile(end);
-
-                    validFiles.add(start.getOriginalFilename());
-                    validFiles.add(end.getOriginalFilename());
-                } else {
-                    throw new ApiException(ExceptionEnum.DISTANCE_OVER_RANGE);
-                }
+            // 시간 비교
+            if (captureDates.get(i).after(captureDates.get(i + 1))) {
+                throw new ApiException(ExceptionEnum.TIME_INCONSISTENT);
             }
+
+            if (distance <= 50.0) {
+                MultipartFile start = files.get(i);
+                MultipartFile end = files.get(i + 1);
+
+                s3StorageService.uploadFile(start);
+                s3StorageService.uploadFile(end);
+
+                validFiles.add(start.getOriginalFilename());
+                validFiles.add(end.getOriginalFilename());
+            } else {
+                throw new ApiException(ExceptionEnum.DISTANCE_OVER_RANGE);
+            }
+        }
 
         return validFiles;
     }
@@ -203,7 +235,8 @@ public class PostServiceImpl implements PostService {
         return getPosts(pageContentKeys, PageRequest.of(page, size), token);
     }
 
-    /** TODO
+    /**
+     * TODO
      *
      * @param token
      * @param page
@@ -293,14 +326,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<PostDetailDTO> allPosts(int page, int size,String token) {
+    public Page<PostDetailDTO> allPosts(int page, int size, String token) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<Post> posts = postRepository.findAll(pageRequest);
-        return getPosts(posts.getContent(), pageRequest,token);
+        return getPosts(posts.getContent(), pageRequest, token);
     }
 
     @Override
-    public Page<PostDetailDTO> getPosts(List<Post> posts, PageRequest pageRequest,String token) {
+    public Page<PostDetailDTO> getPosts(List<Post> posts, PageRequest pageRequest, String token) {
         List<PostDetailDTO> postDetailDTOList = posts.stream().map(post -> PostDetailDTO.builder()
                         .postId(post.getPostId())
                         .title(post.getTitle())
@@ -313,20 +346,8 @@ public class PostServiceImpl implements PostService {
                         .viewCount(post.getViewCount())
                         .like(likeService.isLikePostByUser(post, token))
                         .build())
-                        .toList();
+                .toList();
 
         return new PageImpl<>(postDetailDTOList, pageRequest, postDetailDTOList.size());
-    }
-
-    public String encodeImageToBase64(MultipartFile file) {
-        String encodedString = null;
-        try {
-            byte[] bytes = file.getBytes();
-            encodedString = Base64.getEncoder().encodeToString(bytes);
-        } catch (IOException e) {
-            // 예외처리
-            e.printStackTrace();
-        }
-        return encodedString;
     }
 }

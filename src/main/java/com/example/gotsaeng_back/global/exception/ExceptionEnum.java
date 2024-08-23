@@ -12,8 +12,8 @@ public enum ExceptionEnum {
     ACCESS_DENIED_EXCEPTION(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "인증이 필요합니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "서버 오류 발생"),
     FORBIDDEN(HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다."),
-    DUPLICATE(HttpStatus.CONFLICT,"DUPLICATED" , "중복된 아이디 입니다"),
-    DUPLICATE_MAIL(HttpStatus.CONFLICT,"DUPLICATED_EMAIL" , "중복된 이메일 입니다"),
+    DUPLICATE(HttpStatus.CONFLICT, "DUPLICATED", "중복된 아이디 입니다"),
+    DUPLICATE_MAIL(HttpStatus.CONFLICT, "DUPLICATED_EMAIL", "중복된 이메일 입니다"),
 
     // Token Exception
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "EXPIRED_TOKEN", "토큰이 만료되었습니다."),
@@ -24,17 +24,17 @@ public enum ExceptionEnum {
     INVALID_SIGNATURE(HttpStatus.BAD_REQUEST, "INVALID_SIGNATURE", "유효하지 않은 서명입니다."),
     ILLEGAL_ARGUMENT(HttpStatus.BAD_REQUEST, "ILLEGAL_ARGUMENT", "잘못된 인자입니다."),
     JWT_FILTER_INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "JWT_FILTER_INTERNAL_ERROR", "JWT 필터 내부 오류입니다."),
-    SOCIAL_LOGIN_FAIL(HttpStatus.BAD_REQUEST,"소셜로그인실패"),
+    SOCIAL_LOGIN_FAIL(HttpStatus.BAD_REQUEST, "소셜로그인실패"),
     // User
     EXIST_EMAIL(HttpStatus.BAD_REQUEST, "EXIST_EMAIL", "이미 있는 이메일 입니다."),
-    NO_SEARCH_EMAIL(HttpStatus.BAD_REQUEST,"NO_SEARCH_EMAIL","없는 이메일 입니다"),
-    FAIL_EMAIL_SEND(HttpStatus.BAD_REQUEST,"FAIL_EMAIL_SEND","이메일 발송 오류"),
+    NO_SEARCH_EMAIL(HttpStatus.BAD_REQUEST, "NO_SEARCH_EMAIL", "없는 이메일 입니다"),
+    FAIL_EMAIL_SEND(HttpStatus.BAD_REQUEST, "FAIL_EMAIL_SEND", "이메일 발송 오류"),
     NOT_ALLOW_FILED(HttpStatus.BAD_REQUEST, "NOT_ALLOW_FILED", "이메일 혹은 비밀번호 형식이 틀립니다."),
     DIFFERENT_PASSWORD(HttpStatus.BAD_REQUEST, "DIFFERENT_PASSWORD", "비밀번호가 둘이 다릅니다."),
     FOLLOW_FAIL(HttpStatus.BAD_REQUEST, "FOLLOW_FAIL", "팔로우에 실패하였습니다."),
     UNFOLLOW_FAIL(HttpStatus.BAD_REQUEST, "UNFOLLOW_FAIL", "팔로우에 실패하였습니다."),
-    ID_PASSWORD_FAIL(HttpStatus.BAD_REQUEST,"LOGIN_FAIL","아이디 또는 비밀번호가 틀렸습니다."),
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND,"USER_NOT_FOUND","유저를 찾지 못했습니다."),
+    ID_PASSWORD_FAIL(HttpStatus.BAD_REQUEST, "LOGIN_FAIL", "아이디 또는 비밀번호가 틀렸습니다."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "유저를 찾지 못했습니다."),
 
     // Comment
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT_NOT_FOUND", "등록된 댓글이 없습니다."),
@@ -70,22 +70,24 @@ public enum ExceptionEnum {
 
     // Post
     EDIT_NOT_COMPLETED(HttpStatus.INTERNAL_SERVER_ERROR, "EDIT_NOT_COMPLETED", "게시물을 수정하지 못했습니다."),
-    CREATE_NOT_COMPLETED(HttpStatus.INTERNAL_SERVER_ERROR,"CREATE_NOT_COMPLETED", "게시물을 작성하지 못했습니다."),
+    CREATE_NOT_COMPLETED(HttpStatus.INTERNAL_SERVER_ERROR, "CREATE_NOT_COMPLETED", "게시물을 작성하지 못했습니다."),
     DELETE_NOT_COMPLETED(HttpStatus.INTERNAL_SERVER_ERROR, "DELETE_NOT_COMPLETED", "게시물을 삭제하지 못했습니다."),
     HISTORY_SAVE_NOT_COMPLETED(HttpStatus.INTERNAL_SERVER_ERROR, "HISTORY_SAVE_NOT_COMPLETED", "시청기록을 저장하지 못했습니다."),
-    VIEW_NOT_INCREASED(HttpStatus.INTERNAL_SERVER_ERROR,"VIEW_NOT_INCREASED","조회수를 수정하지 못했습니다."),
-    END_NOT_FOUND(HttpStatus.BAD_REQUEST,"END_NOT_FOUND","시작과 끝 사진을 모두 업로드 해주세요."),
+    VIEW_NOT_INCREASED(HttpStatus.INTERNAL_SERVER_ERROR, "VIEW_NOT_INCREASED", "조회수를 수정하지 못했습니다."),
+    END_NOT_FOUND(HttpStatus.BAD_REQUEST, "END_NOT_FOUND", "시작과 끝 사진을 모두 업로드 해주세요."),
+    DIFFERENT_TYPE_FILE(HttpStatus.BAD_REQUEST,"DIFFERENT_TYPE_FILE","사진들의 주제가 다릅니다."),
     // S3
-    S3_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"S3_UPLOAD_FAIL","S3에 업로드하지 못했습니다."),
+    S3_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "S3_UPLOAD_FAIL", "S3에 업로드하지 못했습니다."),
     S3_DOWNLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "S3_DOWNLOAD_FAIL", "S3에서 불러오지 못했습니다."),
-    S3_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"S3_DELETE_FAIL","S3에서 삭제하지 못했습니다."),
+    S3_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "S3_DELETE_FAIL", "S3에서 삭제하지 못했습니다."),
 
     // MetaData
     DISTANCE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "DISTANCE_NOT_FOUND", "거리를 측정하지 못했습니다."),
     FILE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_NOT_FOUND", "파일를 찾지 못했습니다."),
-    DISTANCE_OVER_RANGE(HttpStatus.BAD_REQUEST,"DISTANCE_OVER_RANGE","거리 범위를 벗어났습니다."),
-    TIME_NOT_FOUND(HttpStatus.BAD_REQUEST,"TIME_NOT_FOUND","시간을 찾을 수 없습니다."),
-    TIME_INCONSISTENT(HttpStatus.BAD_REQUEST,"TIME_INCONSISTENT","사진 순서를 확인 해주세요.");
+    DISTANCE_OVER_RANGE(HttpStatus.BAD_REQUEST, "DISTANCE_OVER_RANGE", "거리 범위를 벗어났습니다."),
+    TIME_NOT_FOUND(HttpStatus.BAD_REQUEST, "TIME_NOT_FOUND", "시간을 찾을 수 없습니다."),
+    TIME_INCONSISTENT(HttpStatus.BAD_REQUEST, "TIME_INCONSISTENT", "사진 순서를 확인 해주세요."),
+    ;
     private final HttpStatus status;
     private final String code;
     private String message;
