@@ -183,11 +183,11 @@ public class PostServiceImpl implements PostService {
                 MultipartFile start = files.get(i);
                 MultipartFile end = files.get(i + 1);
 
-                s3StorageService.uploadFile(start);
-                s3StorageService.uploadFile(end);
+                String startKey = s3StorageService.uploadFile(start);
+                String endKey = s3StorageService.uploadFile(end);
 
-                validFiles.add(start.getOriginalFilename());
-                validFiles.add(end.getOriginalFilename());
+                validFiles.add(startKey);
+                validFiles.add(endKey);
             } else {
                 throw new ApiException(ExceptionEnum.DISTANCE_OVER_RANGE);
             }
