@@ -135,23 +135,21 @@ public class PostServiceImpl implements PostService {
     // 파일의 거리 및 시간 검증을 수행하고 업로드하는 메서드
     private List<String> validateFilesAndUpload(List<MultipartFile> files, List<GeoLocation> geoLocations, List<Date> captureDates) {
         List<String> validFiles = new ArrayList<>();
-
-        for (int i = 0; i < geoLocations.size() - 1; i++) {
-            for (int j = i + 1; j < geoLocations.size(); j++) {
+        for (int i = 0; i < geoLocations.size() - 1; i+=2) {
                 // 거리 계산
                 double distance = calculateDistance(
                         geoLocations.get(i).getLatitude(), geoLocations.get(i).getLongitude(),
-                        geoLocations.get(j).getLatitude(), geoLocations.get(j).getLongitude()
+                        geoLocations.get(i+1).getLatitude(), geoLocations.get(i+1).getLongitude()
                 );
 
                 // 시간 비교
-                if (captureDates.get(i).after(captureDates.get(j))) {
+                if (captureDates.get(i).after(captureDates.get(i+1))) {
                     throw new ApiException(ExceptionEnum.TIME_INCONSISTENT);
                 }
 
                 if (distance <= 50.0) {
                     MultipartFile start = files.get(i);
-                    MultipartFile end = files.get(j);
+                    MultipartFile end = files.get(i+1);
 
                     s3StorageService.uploadFile(start);
                     s3StorageService.uploadFile(end);
@@ -162,7 +160,6 @@ public class PostServiceImpl implements PostService {
                     throw new ApiException(ExceptionEnum.DISTANCE_OVER_RANGE);
                 }
             }
-        }
 
         return validFiles;
     }
@@ -206,6 +203,13 @@ public class PostServiceImpl implements PostService {
         return getPosts(pageContentKeys, PageRequest.of(page, size), token);
     }
 
+    /** TODO
+     *
+     * @param token
+     * @param page
+     * @param size
+     * @return
+     */
     public Page<PostDetailDTO> followingPosts(String token, int page, int size) {
         List<FollowDto> followingList = followService.getFollowingList(jwtUtil.getUserIdFromToken(token));
         List<Post> followingPosts = new ArrayList<>();
@@ -274,6 +278,7 @@ public class PostServiceImpl implements PostService {
 
         boolean like = likeService.isLikePostByUser(post, token);
         return PostDetailDTO.builder()
+                .postId(post.getPostId())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .files(post.getFiles())
@@ -297,6 +302,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<PostDetailDTO> getPosts(List<Post> posts, PageRequest pageRequest,String token) {
         List<PostDetailDTO> postDetailDTOList = posts.stream().map(post -> PostDetailDTO.builder()
+                        .postId(post.getPostId())
                         .title(post.getTitle())
                         .content(post.getContent())
                         .files(post.getFiles())
