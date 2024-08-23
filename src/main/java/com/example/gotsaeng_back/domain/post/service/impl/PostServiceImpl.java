@@ -1,5 +1,11 @@
 package com.example.gotsaeng_back.domain.post.service.impl;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.lang.GeoLocation;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
+import com.drew.metadata.exif.GpsDirectory;
 import com.example.gotsaeng_back.domain.auth.dto.FollowDto;
 import com.example.gotsaeng_back.domain.auth.entity.History;
 import com.example.gotsaeng_back.domain.auth.entity.User;
@@ -25,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -72,26 +79,81 @@ public class PostServiceImpl implements PostService {
 
     }
 
-    @Override
-    @Transactional
     public Post createPost(PostCreateDTO postCreateDTO, List<MultipartFile> files, String token) {
+        if (files.size() % 2 != 0) {
+            throw new ApiException(ExceptionEnum.END_NOT_FOUND);
+        }
         Post post = new Post();
         try {
             post.setTitle(postCreateDTO.getTitle());
             post.setContent(postCreateDTO.getContent());
-            List<String> list = files.stream()
-                    .map(s3StorageService::uploadFile)
-                    .toList();
-            post.setFiles(list);
+
+            // GPS 정보 리스트
+            List<GeoLocation> geoLocations = new ArrayList<>();
+            List<String> validFiles = new ArrayList<>();
+
+            // 각 파일의 GPS 정보 추출 및 리스트에 저장
+            for (MultipartFile file : files) {
+                try {
+                    Metadata metadata = ImageMetadataReader.readMetadata(file.getInputStream());
+
+                    GpsDirectory gpsDirectory = metadata.getFirstDirectoryOfType(GpsDirectory.class);
+                    if (gpsDirectory != null && gpsDirectory.getGeoLocation() != null) {
+                        GeoLocation geoLocation = gpsDirectory.getGeoLocation();
+                        geoLocations.add(geoLocation);
+                    } else {
+                        throw new ApiException(ExceptionEnum.DISTANCE_NOT_FOUND);
+                    }
+                } catch (ImageProcessingException | IOException e) {
+                    throw new ApiException(ExceptionEnum.METADATA_NOT_FOUND);
+                }
+            }
+
+            // 짝 지어 거리 계산 및 업로드
+            for (int i = 0; i < geoLocations.size() - 1; i++) {
+                for (int j = i + 1; j < geoLocations.size(); j++) {
+                    double distance = calculateDistance(
+                            geoLocations.get(i).getLatitude(), geoLocations.get(i).getLongitude(),
+                            geoLocations.get(j).getLatitude(), geoLocations.get(j).getLongitude()
+                    );
+
+                    if (distance <= 50.0) {
+                        // 거리 차이가 50m 이하인 경우에만 파일 업로드
+                        MultipartFile start = files.get(i);
+                        MultipartFile end = files.get(j);
+
+                        s3StorageService.uploadFile(start);
+                        s3StorageService.uploadFile(end);
+
+                        validFiles.add(start.getOriginalFilename());
+                        validFiles.add(end.getOriginalFilename());
+                    }
+                }
+            }
+
+            post.setFiles(validFiles);
             String username = jwtUtil.getUserNameFromToken(token);
             User user = userService.findByUsername(username);
             post.setUser(user);
             savePost(post);
+
         } catch (Exception e) {
             throw new ApiException(ExceptionEnum.CREATE_NOT_COMPLETED);
         }
 
         return post;
+    }
+
+    // 거리 계산 함수 (Haversine 공식 사용)
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // 지구 반경 (km)
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c * 1000; // 거리 (미터 단위)
     }
 
     @Override

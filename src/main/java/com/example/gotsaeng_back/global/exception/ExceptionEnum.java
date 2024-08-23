@@ -74,11 +74,15 @@ public enum ExceptionEnum {
     DELETE_NOT_COMPLETED(HttpStatus.INTERNAL_SERVER_ERROR, "DELETE_NOT_COMPLETED", "게시물을 삭제하지 못했습니다."),
     HISTORY_SAVE_NOT_COMPLETED(HttpStatus.INTERNAL_SERVER_ERROR, "HISTORY_SAVE_NOT_COMPLETED", "시청기록을 저장하지 못했습니다."),
     VIEW_NOT_INCREASED(HttpStatus.INTERNAL_SERVER_ERROR,"VIEW_NOT_INCREASED","조회수를 수정하지 못했습니다."),
-
+    END_NOT_FOUND(HttpStatus.BAD_REQUEST,"END_NOT_FOUND","시작과 끝 사진을 모두 업로드 해주세요."),
     // S3
     S3_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"S3_UPLOAD_FAIL","S3에 업로드하지 못했습니다."),
     S3_DOWNLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "S3_DOWNLOAD_FAIL", "S3에서 불러오지 못했습니다."),
-    S3_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"S3_DELETE_FAIL","S3에서 삭제하지 못했습니다.");
+    S3_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"S3_DELETE_FAIL","S3에서 삭제하지 못했습니다."),
+
+    // MetaData
+    DISTANCE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "DISTANCE_NOT_FOUND", "거리를 측정하지 못했습니다."),
+    METADATA_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR,"METADATA_NOT_FOUND","메타데이터를 찾지 못했습니다.");
     private final HttpStatus status;
     private final String code;
     private String message;
