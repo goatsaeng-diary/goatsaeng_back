@@ -66,4 +66,5 @@ public class GPTServiceImpl implements GPTService {
         Word word = wordRepository.findById(randomNumber).orElseThrow();
         return word;
     }
+
 }
