@@ -317,4 +317,16 @@ public class PostServiceImpl implements PostService {
 
         return new PageImpl<>(postDetailDTOList, pageRequest, postDetailDTOList.size());
     }
+
+    public String encodeImageToBase64(MultipartFile file) {
+        String encodedString = null;
+        try {
+            byte[] bytes = file.getBytes();
+            encodedString = Base64.getEncoder().encodeToString(bytes);
+        } catch (IOException e) {
+            // 예외처리
+            e.printStackTrace();
+        }
+        return encodedString;
+    }
 }

@@ -3,6 +3,8 @@ package com.example.gotsaeng_back.global.gptapi.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
@@ -20,5 +22,16 @@ public class WebClientConfig {
                 .defaultHeader("Authorization", "Bearer " + apiKey)  // OpenAI API 인증용 커스텀 헤더 설정
                 .defaultHeader("Content-Type", "application/json")  // 요청 본문이 JSON 형식임을 명시
                 .build();  // 설정된 WebClient 인스턴스를 반환
+    }
+
+    @Bean
+    public RestTemplate template() {
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getInterceptors().add((request, body, execution) -> {
+            request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+            request.getHeaders().set("Authorization", "Bearer " + apiKey);
+            return execution.execute(request, body);
+        });
+        return restTemplate;
     }
 }
