@@ -11,4 +11,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GPTRequestDto {
     private String prompt; // 사용자 입력 프롬프트
+
 }
