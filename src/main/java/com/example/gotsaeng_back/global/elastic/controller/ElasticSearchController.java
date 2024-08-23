@@ -1,10 +1,12 @@
 package com.example.gotsaeng_back.global.elastic.controller;
 
+import com.example.gotsaeng_back.global.elastic.index.Study;
 import com.example.gotsaeng_back.global.elastic.service.HwpFileService;
 import com.example.gotsaeng_back.global.elastic.service.StudyElsService;
 import com.example.gotsaeng_back.global.gptapi.dto.GPTResponseDto;
 import com.example.gotsaeng_back.global.gptapi.service.GPTService;
 import com.example.gotsaeng_back.global.response.CustomResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
@@ -59,27 +61,12 @@ public class ElasticSearchController {
     }
 
 
-    @PostMapping("/chat")
-    public ResponseEntity<String> chat(@RequestParam("content") String text) throws IOException {
-        SearchRequest searchRequest = new SearchRequest("study");
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(QueryBuilders.matchQuery("content", text));
-        searchRequest.source(searchSourceBuilder);
-
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        String responseText;
-
-        if (searchResponse.getHits().getHits().length > 0) {
-            responseText = searchResponse.getHits().getHits()[0].getSourceAsString();
-        } else {
-            responseText = "Document not found, generating response from ChatGPT.";
-        }
-
-        System.out.println(responseText);
-        return null;
+    @GetMapping("/list")
+    public CustomResponse<List<String>> chat() throws IOException {
+        return studyElsService.findAll();
     }
 
-    @GetMapping("/search")
+    @GetMapping("/chat")
     public Mono<CustomResponse<GPTResponseDto>> getChatGptResponse(@RequestParam("content") String content) {
         return studyElsService.findByContentMatch(content)
                 .map(dto -> new CustomResponse<>(HttpStatus.OK, "답변 결과입니다", dto))

@@ -54,8 +54,6 @@ public class GPTController {
                     });
         }
     }
-
-
     @PostMapping("/wordInsert")
     public void fileInsert(){
         String filePath = "/Users/jeonghohyeon/Downloads/words.xls";

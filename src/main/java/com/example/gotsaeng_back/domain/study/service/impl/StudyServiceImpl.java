@@ -33,4 +33,13 @@ public class StudyServiceImpl implements StudyService {
     public boolean existsByToday(LocalDate today) {
         return studyRepository.existsByCreatedAt(today);
     }
+
+    @Override
+    public boolean getAnswer(String answer) {
+        Study study = studyRepository.findByCreatedAt(LocalDate.now());
+        if(study.getAnswer().equals(answer)){
+            return true;
+        }
+        return false;
+    }
 }
