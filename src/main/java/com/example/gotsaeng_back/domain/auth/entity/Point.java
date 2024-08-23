@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name ="points")
@@ -24,7 +24,10 @@ public class Point {
     private String pointHistory;
 
     @Column(name = "get_date", nullable = false)
-    private LocalDateTime getDate = LocalDateTime.now();
+    private LocalDate getDate;
+
+    @Column(name = "value", nullable = false)
+    private double value;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
