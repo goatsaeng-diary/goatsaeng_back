@@ -1,13 +1,19 @@
 package com.example.gotsaeng_back.global.elastic.service;
 
+import static com.example.gotsaeng_back.global.exception.ExceptionEnum.INTERNAL_SERVER_ERROR;
+
 import com.example.gotsaeng_back.global.elastic.index.Study;
 import com.example.gotsaeng_back.global.elastic.repository.StudyElsRepository;
+import com.example.gotsaeng_back.global.exception.ApiException;
 import com.example.gotsaeng_back.global.gptapi.dto.GPTRequestDto;
 import com.example.gotsaeng_back.global.gptapi.dto.GPTResponseDto;
 import com.example.gotsaeng_back.global.gptapi.service.GPTService;
 import com.example.gotsaeng_back.global.response.CustomResponse;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -41,8 +47,27 @@ public class StudyElsService {
                     return dto;
                 })
                 .doOnError(error -> {
-                    // 오류가 발생했을 때 실행되는 코드
-                    System.err.println("Error occurred: " + error.getMessage());
+                    throw new ApiException(INTERNAL_SERVER_ERROR);
                 });
+    }
+
+    public CustomResponse<List<String>> findAll() {
+        try {
+            // ElasticSearch에서 모든 문서 검색
+            Iterable<Study> iterable = studyElsRepository.findAll();
+
+            // Iterable<Study>를 List<Study>로 변환
+            List<String> list = new ArrayList<>();
+            for (Study study : iterable) {
+                list.add(study.getTitle());
+            }
+
+            // 성공적인 응답 반환
+            return new CustomResponse<>(HttpStatus.OK, "문서 목록을 가져왔습니다", list);
+
+        } catch (Exception e) {
+            // 예외 발생 시 응답 생성
+            throw  new ApiException(INTERNAL_SERVER_ERROR);
+        }
     }
 }

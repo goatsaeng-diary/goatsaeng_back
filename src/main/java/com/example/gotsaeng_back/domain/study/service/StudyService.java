@@ -9,4 +9,6 @@ public interface StudyService {
     void save(GPTResponseDto gptResponseDto, String prompt);
     Study findByToday(LocalDate today);
     boolean existsByToday(LocalDate today);
+
+    boolean getAnswer(String answer);
 }
