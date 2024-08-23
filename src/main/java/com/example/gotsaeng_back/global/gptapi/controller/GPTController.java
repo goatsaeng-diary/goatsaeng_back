@@ -1,5 +1,7 @@
 package com.example.gotsaeng_back.global.gptapi.controller;
 
+import com.example.gotsaeng_back.domain.study.entity.Study;
+import com.example.gotsaeng_back.domain.study.service.StudyService;
 import com.example.gotsaeng_back.global.gptapi.WordRepository;
 import com.example.gotsaeng_back.global.gptapi.dto.GPTRequestDto;
 import com.example.gotsaeng_back.global.gptapi.dto.GPTResponseDto;
@@ -9,6 +11,7 @@ import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -20,6 +23,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -28,22 +32,29 @@ import reactor.core.publisher.Mono;
 public class GPTController {
 
     private final GPTService gptService;
-    private final JwtUtil jwtUtil;
     private final WordRepository wordRepository;
+    private final StudyService studyService;
 
     // GPT API 호출을 처리하는 엔드포인트
-    @PostMapping("/gpt")
-    public Mono<GPTResponseDto> getGptResponse(
-            @RequestHeader("Authorization") String userAccessToken // 클라이언트에서 전달된 사용자 인증 토큰
-    ) {
-        String username = jwtUtil.getUserNameFromToken(userAccessToken);
-        String prompt = gptService.getQuestion();
-        System.out.println(username);
-        // GPT 요청을 위한 DTO 생성
-        GPTRequestDto requestDto = new GPTRequestDto(prompt);
-        // 서비스 호출하여 GPT 응답을 받음
-        return gptService.getGPTResponse(requestDto, userAccessToken);
+    @Scheduled(fixedRate = 28800000) // 28,800,000 milliseconds = 8 hours
+    public void scheduledTask() {
+        boolean existStudy = studyService.existsByToday(LocalDate.now());
+        System.out.println(existStudy);
+        if (!existStudy) {
+            Word word = gptService.getRandomWord();
+            String prompt = gptService.getQuestion(word);
+            GPTRequestDto requestDto = new GPTRequestDto(prompt);
+            gptService.getGPTResponse(requestDto, word)
+                    .subscribe(response -> {
+                        // Asynchronous handling of response
+                        System.out.println("Word from response: " + word.getWordName());
+                    }, error -> {
+                        // Handle errors if necessary
+                        System.err.println("Error occurred: " + error.getMessage());
+                    });
+        }
     }
+
 
     @PostMapping("/wordInsert")
     public void fileInsert(){
