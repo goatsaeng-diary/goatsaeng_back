@@ -82,7 +82,10 @@ public enum ExceptionEnum {
 
     // MetaData
     DISTANCE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "DISTANCE_NOT_FOUND", "거리를 측정하지 못했습니다."),
-    METADATA_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR,"METADATA_NOT_FOUND","메타데이터를 찾지 못했습니다.");
+    FILE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_NOT_FOUND", "파일를 찾지 못했습니다."),
+    DISTANCE_OVER_RANGE(HttpStatus.BAD_REQUEST,"DISTANCE_OVER_RANGE","거리 범위를 벗어났습니다."),
+    TIME_NOT_FOUND(HttpStatus.BAD_REQUEST,"TIME_NOT_FOUND","시간을 찾을 수 없습니다."),
+    TIME_INCONSISTENT(HttpStatus.BAD_REQUEST,"TIME_INCONSISTENT","사진 순서를 확인 해주세요.");
     private final HttpStatus status;
     private final String code;
     private String message;

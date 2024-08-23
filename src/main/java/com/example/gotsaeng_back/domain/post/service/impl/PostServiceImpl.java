@@ -50,8 +50,8 @@ public class PostServiceImpl implements PostService {
 
     @Transactional
     @Override
-    public void savePost(Post post) {
-        postRepository.save(post);
+    public Post savePost(Post post) {
+        return postRepository.save(post);
     }
 
     @Override
@@ -80,68 +80,91 @@ public class PostServiceImpl implements PostService {
     }
 
     public Post createPost(PostCreateDTO postCreateDTO, List<MultipartFile> files, String token) {
+        // 파일의 개수가 짝수인지 확인
         if (files.size() % 2 != 0) {
             throw new ApiException(ExceptionEnum.END_NOT_FOUND);
         }
-        Post post = new Post();
-        try {
-            post.setTitle(postCreateDTO.getTitle());
-            post.setContent(postCreateDTO.getContent());
 
-            // GPS 정보 리스트
-            List<GeoLocation> geoLocations = new ArrayList<>();
-            List<String> validFiles = new ArrayList<>();
+        // 각 파일의 GPS 정보 및 시간 정보 추출
+        List<GeoLocation> geoLocations = new ArrayList<>();
+        List<Date> captureDates = new ArrayList<>();
 
-            // 각 파일의 GPS 정보 추출 및 리스트에 저장
-            for (MultipartFile file : files) {
-                try {
-                    Metadata metadata = ImageMetadataReader.readMetadata(file.getInputStream());
+        for (MultipartFile file : files) {
+            try {
+                Metadata metadata = ImageMetadataReader.readMetadata(file.getInputStream());
 
-                    GpsDirectory gpsDirectory = metadata.getFirstDirectoryOfType(GpsDirectory.class);
-                    if (gpsDirectory != null && gpsDirectory.getGeoLocation() != null) {
-                        GeoLocation geoLocation = gpsDirectory.getGeoLocation();
-                        geoLocations.add(geoLocation);
-                    } else {
-                        throw new ApiException(ExceptionEnum.DISTANCE_NOT_FOUND);
-                    }
-                } catch (ImageProcessingException | IOException e) {
-                    throw new ApiException(ExceptionEnum.METADATA_NOT_FOUND);
+                // GPS 정보 추출
+                GpsDirectory gpsDirectory = metadata.getFirstDirectoryOfType(GpsDirectory.class);
+                if (gpsDirectory != null && gpsDirectory.getGeoLocation() != null) {
+                    geoLocations.add(gpsDirectory.getGeoLocation());
+                } else {
+                    throw new ApiException(ExceptionEnum.DISTANCE_NOT_FOUND);
                 }
-            }
 
-            // 짝 지어 거리 계산 및 업로드
-            for (int i = 0; i < geoLocations.size() - 1; i++) {
-                for (int j = i + 1; j < geoLocations.size(); j++) {
-                    double distance = calculateDistance(
-                            geoLocations.get(i).getLatitude(), geoLocations.get(i).getLongitude(),
-                            geoLocations.get(j).getLatitude(), geoLocations.get(j).getLongitude()
-                    );
-
-                    if (distance <= 50.0) {
-                        // 거리 차이가 50m 이하인 경우에만 파일 업로드
-                        MultipartFile start = files.get(i);
-                        MultipartFile end = files.get(j);
-
-                        s3StorageService.uploadFile(start);
-                        s3StorageService.uploadFile(end);
-
-                        validFiles.add(start.getOriginalFilename());
-                        validFiles.add(end.getOriginalFilename());
-                    }
+                // 촬영 시간 추출
+                ExifSubIFDDirectory directory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+                Date captureDate = null;
+                if (directory != null) {
+                    captureDate = directory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
+                    captureDates.add(captureDate);
+                } else {
+                    throw new ApiException(ExceptionEnum.TIME_NOT_FOUND);
                 }
+
+            } catch (ImageProcessingException | IOException e) {
+                throw new ApiException(ExceptionEnum.FILE_NOT_FOUND);
             }
-
-            post.setFiles(validFiles);
-            String username = jwtUtil.getUserNameFromToken(token);
-            User user = userService.findByUsername(username);
-            post.setUser(user);
-            savePost(post);
-
-        } catch (Exception e) {
-            throw new ApiException(ExceptionEnum.CREATE_NOT_COMPLETED);
         }
 
-        return post;
+        // 거리 및 시간 검증 및 파일 업로드
+        List<String> validFiles = validateFilesAndUpload(files, geoLocations, captureDates);
+
+        // 게시물 생성 및 저장
+        String username = jwtUtil.getUserNameFromToken(token);
+        User user = userService.findByUsername(username);
+
+        return savePost(Post.builder()
+                .files(validFiles)
+                .content(postCreateDTO.getContent())
+                .createdDate(LocalDateTime.now())
+                .title(postCreateDTO.getTitle())
+                .user(user)
+                .build());
+    }
+
+    // 파일의 거리 및 시간 검증을 수행하고 업로드하는 메서드
+    private List<String> validateFilesAndUpload(List<MultipartFile> files, List<GeoLocation> geoLocations, List<Date> captureDates) {
+        List<String> validFiles = new ArrayList<>();
+
+        for (int i = 0; i < geoLocations.size() - 1; i++) {
+            for (int j = i + 1; j < geoLocations.size(); j++) {
+                // 거리 계산
+                double distance = calculateDistance(
+                        geoLocations.get(i).getLatitude(), geoLocations.get(i).getLongitude(),
+                        geoLocations.get(j).getLatitude(), geoLocations.get(j).getLongitude()
+                );
+
+                // 시간 비교
+                if (captureDates.get(i).after(captureDates.get(j))) {
+                    throw new ApiException(ExceptionEnum.TIME_INCONSISTENT);
+                }
+
+                if (distance <= 50.0) {
+                    MultipartFile start = files.get(i);
+                    MultipartFile end = files.get(j);
+
+                    s3StorageService.uploadFile(start);
+                    s3StorageService.uploadFile(end);
+
+                    validFiles.add(start.getOriginalFilename());
+                    validFiles.add(end.getOriginalFilename());
+                } else {
+                    throw new ApiException(ExceptionEnum.DISTANCE_OVER_RANGE);
+                }
+            }
+        }
+
+        return validFiles;
     }
 
     // 거리 계산 함수 (Haversine 공식 사용)
