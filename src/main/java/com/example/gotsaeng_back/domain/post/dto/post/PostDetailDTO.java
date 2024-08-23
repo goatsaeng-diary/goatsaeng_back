@@ -9,6 +9,9 @@ import java.util.List;
 @Builder
 @Getter
 public class PostDetailDTO {
+
+    private Long postId;
+
     private String nickname;
 
     private String title;

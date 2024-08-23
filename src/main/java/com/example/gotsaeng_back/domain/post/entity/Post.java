@@ -31,6 +31,10 @@ public class Post {
     @Column(nullable = false)
     private String content;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "record_type",nullable = false)
+    private RecordType recordType;
+
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate = LocalDateTime.now();
 
