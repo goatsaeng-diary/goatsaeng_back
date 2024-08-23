@@ -2,6 +2,7 @@ package com.example.gotsaeng_back.global.elastic.controller;
 
 import com.example.gotsaeng_back.global.elastic.service.HwpFileService;
 import com.example.gotsaeng_back.global.elastic.service.StudyElsService;
+import com.example.gotsaeng_back.global.gptapi.dto.GPTResponseDto;
 import com.example.gotsaeng_back.global.gptapi.service.GPTService;
 import com.example.gotsaeng_back.global.response.CustomResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/doc")
@@ -74,13 +76,17 @@ public class ElasticSearchController {
         }
 
         System.out.println(responseText);
-        String gptResponse = getChatGptResponse(responseText);
-        return ResponseEntity.ok(gptResponse);
+        return null;
     }
 
     @GetMapping("/search")
-    public String getChatGptResponse(@RequestParam("content") String content) {
-        studyElsService.findByContentMatch(content);
-        return "ChatGPT response based on prompt: " + content;
+    public Mono<CustomResponse<GPTResponseDto>> getChatGptResponse(@RequestParam("content") String content) {
+        return studyElsService.findByContentMatch(content)
+                .map(dto -> new CustomResponse<>(HttpStatus.OK, "답변 결과입니다", dto))
+                .onErrorResume(error -> {
+                    // 오류가 발생했을 때 처리
+                    System.err.println("Error occurred: " + error.getMessage());
+                    return Mono.just(new CustomResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다", null));
+                });
     }
 }

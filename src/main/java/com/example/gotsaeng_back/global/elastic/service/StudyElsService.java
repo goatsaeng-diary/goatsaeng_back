@@ -5,6 +5,7 @@ import com.example.gotsaeng_back.global.elastic.repository.StudyElsRepository;
 import com.example.gotsaeng_back.global.gptapi.dto.GPTRequestDto;
 import com.example.gotsaeng_back.global.gptapi.dto.GPTResponseDto;
 import com.example.gotsaeng_back.global.gptapi.service.GPTService;
+import com.example.gotsaeng_back.global.response.CustomResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,15 +24,25 @@ public class StudyElsService {
         study.setContent(content);
         studyElsRepository.save(study);
     }
-    public List<Study> findByContentMatch(String keyword){
+
+
+    public Mono<GPTResponseDto> findByContentMatch(String keyword) {
         List<Study> list = studyElsRepository.findByContent(keyword);
-        String prompt = "";
-        for(Study study : list){
-            prompt += study.getContent();
+        StringBuilder promptBuilder = new StringBuilder();
+        for (Study study : list) {
+            promptBuilder.append(study.getContent());
         }
-        prompt = prompt + "에서" + keyword + "라는말에 답변을 해줘";
-        Mono<?> mono = gptService.getGPTResponse(new GPTRequestDto(prompt));
-        System.out.println("222"+mono);
-        return null;
+        String prompt = promptBuilder.toString() + "에서 " + keyword + "라는 말에 답변을 해줘";
+
+        return gptService.getGPTResponse(new GPTRequestDto(prompt))
+                .map(response -> {
+                    GPTResponseDto dto = new GPTResponseDto();
+                    dto.setResponse(response.getResponse());
+                    return dto;
+                })
+                .doOnError(error -> {
+                    // 오류가 발생했을 때 실행되는 코드
+                    System.err.println("Error occurred: " + error.getMessage());
+                });
     }
 }

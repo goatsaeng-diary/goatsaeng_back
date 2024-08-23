@@ -54,6 +54,7 @@ public class GPTServiceImpl implements GPTService {
 
     @Override
     public Mono<GPTResponseDto> getGPTResponse(GPTRequestDto requestDto) {
+        System.out.println(requestDto.getPrompt());
         System.out.println("서비스호출");
         // WebClient를 사용하여 OpenAI API에 요청을 보냄
         return webClient.post()
