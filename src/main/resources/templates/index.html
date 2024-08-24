@@ -26,7 +26,7 @@
             formData.append('files', fileInput.files[i]);
         }
 
-        fetch('/api/upload', {
+        fetch('/api/doc/upload', {
             method: 'POST',
             body: formData
         })

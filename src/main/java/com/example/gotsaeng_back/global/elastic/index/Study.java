@@ -11,7 +11,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 @Setter
 public class Study {
     @Id
-    private Long id;
+    private String id;
     private String title;
     private String content;
 }

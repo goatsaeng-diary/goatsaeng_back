@@ -47,6 +47,35 @@ public class GPTServiceImpl implements GPTService {
                     Map<String, String> message = (Map<String, String>) choices.get("message");
                     studyService.save(new GPTResponseDto(message.get("content")), word.getWordName());
                     System.out.println("21312"+word.getWordName());
+
+                    return new GPTResponseDto(message.get("content"));
+                });
+    }
+
+    @Override
+    public Mono<GPTResponseDto> getGPTResponse(GPTRequestDto requestDto) {
+        System.out.println(requestDto.getPrompt());
+        System.out.println("서비스호출");
+        // WebClient를 사용하여 OpenAI API에 요청을 보냄
+        return webClient.post()
+                .uri("/chat/completions")  // OpenAI API 엔드포인트
+//                .header("Authorization", "Bearer " + userAccessToken)  // 사용자 인증 토큰 추가
+                .bodyValue(Map.of(
+                        "model", "gpt-4o",  // 사용할 GPT 모델
+                        "messages", new Object[]{ // 대화의 내용을 전달
+                                Map.of(
+                                        "role", "user",
+                                        "content", requestDto.getPrompt()  // 사용자 프롬프트 추가
+                                )
+                        }
+                ))
+                .retrieve()  // API 응답을 받아옴
+                .bodyToMono(Map.class)  // 응답을 Mono 객체로 변환
+                .map(response -> {
+                    // 응답에서 필요한 메시지를 추출하여 DTO로 변환
+                    Map<String, Object> choices = (Map<String, Object>) ((java.util.List<?>) response.get("choices")).get(0);
+                    Map<String, String> message = (Map<String, String>) choices.get("message");
+                    System.out.println("1231231");
                     return new GPTResponseDto(message.get("content"));
                 });
     }
