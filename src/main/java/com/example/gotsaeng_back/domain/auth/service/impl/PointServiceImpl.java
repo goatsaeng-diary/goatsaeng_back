@@ -10,6 +10,9 @@ import com.example.gotsaeng_back.global.jwt.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class PointServiceImpl implements PointService {
@@ -29,5 +32,17 @@ public class PointServiceImpl implements PointService {
         point.setUser(user);
 
         pointRepository.save(point);
+    }
+
+    @Override
+    public List<PointDto> findByUser(String token) {
+        String username = jwtUtil.getUserNameFromToken(token);
+        User user = userService.findByUsername(username);
+
+        List<Point> points = pointRepository.findByUser(user);
+
+        return points.stream()
+                .map(point -> new PointDto(point.getValue(), point.getGetDate()))
+                .collect(Collectors.toList());
     }
 }
