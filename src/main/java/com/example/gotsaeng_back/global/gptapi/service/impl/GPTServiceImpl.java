@@ -2,10 +2,13 @@ package com.example.gotsaeng_back.global.gptapi.service.impl;
 
 import com.example.gotsaeng_back.domain.study.service.StudyService;
 import com.example.gotsaeng_back.global.gptapi.WordRepository;
+import com.example.gotsaeng_back.global.gptapi.dto.GPTDocRequestDto;
 import com.example.gotsaeng_back.global.gptapi.dto.GPTRequestDto;
 import com.example.gotsaeng_back.global.gptapi.dto.GPTResponseDto;
 import com.example.gotsaeng_back.global.gptapi.entity.Word;
 import com.example.gotsaeng_back.global.gptapi.service.GPTService;
+
+import java.util.List;
 import java.util.Random;
 
 import lombok.RequiredArgsConstructor;
@@ -53,7 +56,7 @@ public class GPTServiceImpl implements GPTService {
     }
 
     @Override
-    public Mono<GPTResponseDto> getGPTResponse(GPTRequestDto requestDto) {
+    public Mono<GPTResponseDto> getGPTResponse(GPTDocRequestDto requestDto) {
         System.out.println(requestDto.getPrompt());
         System.out.println("서비스호출");
         // WebClient를 사용하여 OpenAI API에 요청을 보냄
@@ -76,7 +79,15 @@ public class GPTServiceImpl implements GPTService {
                     Map<String, Object> choices = (Map<String, Object>) ((java.util.List<?>) response.get("choices")).get(0);
                     Map<String, String> message = (Map<String, String>) choices.get("message");
                     System.out.println("1231231");
-                    return new GPTResponseDto(message.get("content"));
+                    String promptHeader = "";
+                    for(String title : requestDto.getTitleList()){
+                        promptHeader += title + ", ";
+                    }
+                    if(requestDto.getTitleList().isEmpty()){
+                        return new GPTResponseDto("질문과 관련된 파일을 찾지 못했습니다. 따라서 해당 답변은 직접 생성하여 답변해준 내용입니다. \n" + message.get("content"));
+                    }else{
+                        return new GPTResponseDto(promptHeader + "파일에서 찾은 내용입니다.\n" + message.get("content"));
+                    }
                 });
     }
 
