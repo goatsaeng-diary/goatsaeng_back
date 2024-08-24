@@ -1,5 +1,6 @@
 package com.example.gotsaeng_back.domain.study.service.impl;
 
+import com.example.gotsaeng_back.domain.study.dto.StudyDto;
 import com.example.gotsaeng_back.domain.study.entity.Study;
 import com.example.gotsaeng_back.domain.study.repository.StudyRepository;
 import com.example.gotsaeng_back.domain.study.service.StudyService;
@@ -32,5 +33,14 @@ public class StudyServiceImpl implements StudyService {
     @Override
     public boolean existsByToday(LocalDate today) {
         return studyRepository.existsByCreatedAt(today);
+    }
+
+    @Override
+    public boolean isCorrect(StudyDto studyDto, Study study) {
+        if (studyDto.getAnswer().equals(study.getAnswer())) {
+            return true;
+        }else {
+            return false;
+        }
     }
 }

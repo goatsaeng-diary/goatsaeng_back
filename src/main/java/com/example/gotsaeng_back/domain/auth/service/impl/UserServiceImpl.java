@@ -66,7 +66,6 @@ public class UserServiceImpl implements UserService {
             user.setUsername(dto.getUsername());
             user.setBirthDate(dto.getBirthDate());
             user.setName(dto.getName());
-            user.setTotalPoint(0L);
             user.setNickname(dto.getNickname());
         }catch (Exception e){
             throw new ApiException(INTERNAL_SERVER_ERROR);

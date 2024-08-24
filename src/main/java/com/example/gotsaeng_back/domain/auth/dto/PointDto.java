@@ -11,6 +11,6 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 public class PointDto {
-    private double value;
+    private long value;
     private LocalDate getDate;
 }

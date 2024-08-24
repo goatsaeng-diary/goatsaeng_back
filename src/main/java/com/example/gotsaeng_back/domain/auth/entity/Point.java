@@ -27,7 +27,7 @@ public class Point {
     private LocalDate getDate;
 
     @Column(name = "value", nullable = false)
-    private double value;
+    private long value;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
