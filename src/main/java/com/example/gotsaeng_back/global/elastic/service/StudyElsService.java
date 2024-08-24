@@ -5,6 +5,7 @@ import static com.example.gotsaeng_back.global.exception.ExceptionEnum.INTERNAL_
 import com.example.gotsaeng_back.global.elastic.index.Study;
 import com.example.gotsaeng_back.global.elastic.repository.StudyElsRepository;
 import com.example.gotsaeng_back.global.exception.ApiException;
+import com.example.gotsaeng_back.global.gptapi.dto.GPTDocRequestDto;
 import com.example.gotsaeng_back.global.gptapi.dto.GPTRequestDto;
 import com.example.gotsaeng_back.global.gptapi.dto.GPTResponseDto;
 import com.example.gotsaeng_back.global.gptapi.service.GPTService;
@@ -35,12 +36,14 @@ public class StudyElsService {
     public Mono<GPTResponseDto> findByContentMatch(String keyword) {
         List<Study> list = studyElsRepository.findByContent(keyword);
         StringBuilder promptBuilder = new StringBuilder();
+        List<String> titleList = new ArrayList<>();
         for (Study study : list) {
+            titleList.add(study.getTitle());
             promptBuilder.append(study.getContent());
         }
         String prompt = promptBuilder.toString() + "에서 " + keyword + "라는 말에 답변을 해줘";
 
-        return gptService.getGPTResponse(new GPTRequestDto(prompt))
+        return gptService.getGPTResponse(new GPTDocRequestDto(prompt, titleList))
                 .map(response -> {
                     GPTResponseDto dto = new GPTResponseDto();
                     dto.setResponse(response.getResponse());
