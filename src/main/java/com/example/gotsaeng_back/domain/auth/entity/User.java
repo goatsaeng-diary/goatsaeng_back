@@ -45,10 +45,6 @@ public class User {
 
     private String provider;
 
-    @Column(name = "total_point")
-    private Long totalPoint = 0L;
-
-
     @Enumerated(EnumType.STRING)
     private RoleType role;
 
