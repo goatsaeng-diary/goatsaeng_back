@@ -41,8 +41,7 @@ public class StudyElsService {
             titleList.add(study.getTitle());
             promptBuilder.append(study.getContent());
         }
-        String prompt = promptBuilder.toString() + "에서 " + keyword + "라는 말에 답변을 해줘";
-
+        String prompt = promptBuilder.toString() + "에서 " + keyword + "라는 말에 답변을 해줘. 꼭 위의 내용에서 찾아줘 강조하는 부분 없이 오로지 글자로만 대답해줘";
         return gptService.getGPTResponse(new GPTDocRequestDto(prompt, titleList))
                 .map(response -> {
                     GPTResponseDto dto = new GPTResponseDto();

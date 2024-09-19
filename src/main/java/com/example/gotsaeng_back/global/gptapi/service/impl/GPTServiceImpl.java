@@ -49,7 +49,6 @@ public class GPTServiceImpl implements GPTService {
                     Map<String, Object> choices = (Map<String, Object>) ((java.util.List<?>) response.get("choices")).get(0);
                     Map<String, String> message = (Map<String, String>) choices.get("message");
                     studyService.save(new GPTResponseDto(message.get("content")), word.getWordName());
-                    System.out.println("21312"+word.getWordName());
 
                     return new GPTResponseDto(message.get("content"));
                 });
@@ -57,8 +56,6 @@ public class GPTServiceImpl implements GPTService {
 
     @Override
     public Mono<GPTResponseDto> getGPTResponse(GPTDocRequestDto requestDto) {
-        System.out.println(requestDto.getPrompt());
-        System.out.println("서비스호출");
         // WebClient를 사용하여 OpenAI API에 요청을 보냄
         return webClient.post()
                 .uri("/chat/completions")  // OpenAI API 엔드포인트
@@ -84,9 +81,9 @@ public class GPTServiceImpl implements GPTService {
                         promptHeader += title + ", ";
                     }
                     if(requestDto.getTitleList().isEmpty()){
-                        return new GPTResponseDto("질문과 관련된 파일을 찾지 못했습니다. 따라서 해당 답변은 직접 생성하여 답변해준 내용입니다. \n" + message.get("content"));
+                        return new GPTResponseDto("질문과 관련된 파일을 찾지 못했습니다.");
                     }else{
-                        return new GPTResponseDto(promptHeader + "파일에서 찾은 내용입니다.\n" + message.get("content"));
+                        return new GPTResponseDto(promptHeader + "파일에서 찾은 내용입니다.\n" + message.get("content").replace("#", "").replace("*",""));
                     }
                 });
     }
